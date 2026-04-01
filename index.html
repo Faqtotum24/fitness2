@@ -7,366 +7,338 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --black: #0a0a0a;
-    --dark: #111111;
-    --card: #181818;
-    --card2: #1e1e1e;
-    --border: #2a2a2a;
-    --text: #e8e4dc;
-    --muted: #666;
-    --muted2: #888;
-    --accent-a: #c8f25a;
-    --accent-b: #5ab4f2;
-    --accent-c: #f2925a;
-    --accent-r: #f25a7a;
-    --white: #ffffff;
-    --success: #4ade80;
-    --danger: #f87171;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    background: var(--black);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-
-  /* ── NAV ── */
-  .nav {
-    background: var(--dark);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: stretch;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .nav-brand {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: var(--accent-a);
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    border-right: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  .nav-tabs { display: flex; flex: 1; }
-  .nav-tab {
-    flex: 1;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 16px 12px 13px;
-    transition: all 0.2s;
-  }
-  .nav-tab:hover { color: var(--text); }
-  .nav-tab.active { color: var(--white); border-bottom-color: var(--accent-a); }
-  .nav-status {
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    border-left: 1px solid var(--border);
-  }
-  .status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--muted);
-  }
-  .status-dot.ok { background: var(--success); box-shadow: 0 0 6px var(--success); }
-  .status-dot.err { background: var(--danger); }
-
-  /* ── VIEWS ── */
-  .view { display: none; flex: 1; overflow-y: auto; }
-  .view.active { display: block; }
-
-  /* ── PROGRAM VIEW ── */
-  .hero {
-    background: var(--dark);
-    border-bottom: 1px solid var(--border);
-    padding: 40px 32px 32px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 260px; height: 260px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(200,242,90,0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-a); margin-bottom: 10px; }
-  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 8vw, 72px); line-height: 0.95; color: var(--white); }
-  .hero h1 span { color: var(--accent-a); }
-  .hero-sub { margin-top: 12px; font-size: 13px; color: var(--muted2); max-width: 460px; line-height: 1.6; }
-
-  .stats-strip { display: flex; border-bottom: 1px solid var(--border); overflow-x: auto; }
-  .stat-item { flex: 1; min-width: 110px; padding: 18px 20px; border-right: 1px solid var(--border); }
-  .stat-item:last-child { border-right: none; }
-  .stat-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
-  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--white); }
-  .stat-unit { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-left: 3px; }
-
-  .week-row { display: grid; grid-template-columns: repeat(7,1fr); border-bottom: 1px solid var(--border); }
-  .week-day { padding: 14px 10px; border-right: 1px solid var(--border); text-align: center; }
-  .week-day:last-child { border-right: none; }
-  .day-name { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
-  .day-badge { display: inline-block; font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 1px; padding: 3px 9px; border-radius: 4px; white-space: nowrap; margin-bottom: 4px; }
-  .badge-rest { background: var(--border); color: var(--muted); }
-  .badge-a { background: rgba(200,242,90,0.12); color: var(--accent-a); border: 1px solid rgba(200,242,90,0.25); }
-  .badge-b { background: rgba(90,180,242,0.12); color: var(--accent-b); border: 1px solid rgba(90,180,242,0.25); }
-  .badge-c { background: rgba(242,146,90,0.12); color: var(--accent-c); border: 1px solid rgba(242,146,90,0.25); }
-  .badge-rugby { background: rgba(242,90,122,0.12); color: var(--accent-r); border: 1px solid rgba(242,90,122,0.25); }
-
-  .p-section { padding: 40px 28px 0; }
-  .p-section-hdr { display: flex; align-items: baseline; gap: 14px; margin-bottom: 20px; }
-  .p-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
-  .p-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--white); letter-spacing: 1px; }
-
-  .session-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
-  .session-hdr { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; }
-  .session-hdr.a { border-left: 4px solid var(--accent-a); }
-  .session-hdr.b { border-left: 4px solid var(--accent-b); }
-  .session-hdr.c { border-left: 4px solid var(--accent-c); }
-  .s-day { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-  .s-title { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--white); letter-spacing: 1px; }
-  .s-sub { font-size: 12px; color: var(--muted2); margin-top: 5px; line-height: 1.5; max-width: 440px; }
-  .s-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); line-height: 1.9; text-align: right; white-space: nowrap; }
-  .s-meta span { color: var(--text); }
-
-  .ex-table { width: 100%; border-collapse: collapse; }
-  .ex-table th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
-  .ex-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
-  .ex-table tr:last-child td { border-bottom: none; }
-  .ex-table tr:hover td { background: rgba(255,255,255,0.015); }
-  .ex-name { font-weight: 600; color: var(--white); font-size: 13px; margin-bottom: 3px; }
-  .ex-cue { font-size: 12px; color: var(--muted2); line-height: 1.5; max-width: 320px; }
-  .ex-sets { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); }
-  .ex-rest { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .ex-note { font-size: 11px; color: var(--muted); font-style: italic; line-height: 1.5; }
-  .ktag { display: inline-block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; background: rgba(200,242,90,0.08); color: var(--accent-a); border: 1px solid rgba(200,242,90,0.18); margin-bottom: 4px; }
-
-  .rules-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
-  .rules-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--white); letter-spacing: 1px; margin-bottom: 14px; }
-  .rule-row { display: flex; gap: 12px; margin-bottom: 10px; font-size: 13px; line-height: 1.6; }
-  .rule-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent-a); min-width: 22px; padding-top: 2px; }
-
-  .protein-box { background: linear-gradient(135deg, rgba(200,242,90,0.05), rgba(200,242,90,0.01)); border: 1px solid rgba(200,242,90,0.18); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
-  .protein-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent-a); letter-spacing: 1px; margin-bottom: 4px; }
-  .protein-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--white); line-height: 1; margin: 6px 0; }
-  .protein-num span { font-size: 18px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-weight: 300; }
-  .protein-note { font-size: 13px; color: var(--muted2); line-height: 1.6; margin-top: 8px; }
-
-  .phase-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 40px; }
-  .phase-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--white); letter-spacing: 1px; margin-bottom: 14px; }
-  .phase-row { display: grid; grid-template-columns: 90px 1fr; gap: 14px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-  .phase-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .phase-lbl { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent-a); text-transform: uppercase; letter-spacing: 1px; padding-top: 2px; }
-  .phase-desc { font-size: 13px; color: var(--text); line-height: 1.6; }
-
-  /* ── LOG VIEW ── */
-  .log-view { padding: 28px; max-width: 700px; margin: 0 auto; }
-  .log-header { margin-bottom: 24px; }
-  .log-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--white); letter-spacing: 1px; }
-  .log-header p { font-size: 13px; color: var(--muted2); margin-top: 4px; }
-
-  .session-picker { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 28px; }
-  .session-btn {
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 10px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-  }
-  .session-btn:hover { border-color: var(--muted); }
-  .session-btn.selected-a { border-color: var(--accent-a); background: rgba(200,242,90,0.06); }
-  .session-btn.selected-b { border-color: var(--accent-b); background: rgba(90,180,242,0.06); }
-  .session-btn.selected-c { border-color: var(--accent-c); background: rgba(242,146,90,0.06); }
-  .sb-label { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); letter-spacing: 1px; }
-  .sb-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
-  .sb-day { font-size: 11px; color: var(--muted2); margin-top: 5px; }
-
-  .log-date-row { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-  .log-date-row label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
-  .log-date-row input { background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 8px 12px; outline: none; }
-  .log-date-row input:focus { border-color: var(--accent-a); }
-
-  .log-notes-row { margin-bottom: 24px; }
-  .log-notes-row label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 6px; }
-  .log-notes-row textarea { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px 12px; outline: none; resize: vertical; min-height: 60px; }
-  .log-notes-row textarea:focus { border-color: var(--accent-a); }
-
-  .ex-log-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
-  .ex-log-hdr { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
-  .ex-log-name { font-weight: 600; color: var(--white); font-size: 14px; }
-  .ex-log-spec { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .ex-skip { background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; cursor: pointer; transition: all 0.15s; }
-  .ex-skip:hover { border-color: var(--muted); color: var(--text); }
-  .ex-skip.skipped { background: rgba(248,113,113,0.1); border-color: var(--danger); color: var(--danger); }
-
-  .ex-log-body { padding: 14px 18px; }
-  .sets-grid { display: grid; gap: 8px; }
-  .set-row { display: grid; gap: 8px; align-items: center; }
-  .set-row.type-reps { grid-template-columns: 50px 1fr; }
-  .set-row.type-weight-reps { grid-template-columns: 50px 1fr 1fr; }
-  .set-row.type-time { grid-template-columns: 50px 1fr; }
-  .set-row.type-reps-depth { grid-template-columns: 50px 1fr 1fr; }
-  .set-row.type-weight-reps-side { grid-template-columns: 50px 1fr 1fr; }
-  .set-lbl { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .set-input-wrap { display: flex; flex-direction: column; gap: 2px; }
-  .set-input-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-  .set-input {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--white);
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    padding: 8px 10px;
-    outline: none;
-    width: 100%;
-    transition: border-color 0.15s;
-  }
-  .set-input:focus { border-color: var(--accent-a); }
-  .set-input::placeholder { color: var(--muted); font-size: 12px; }
-  .set-input.skipped-input { opacity: 0.3; pointer-events: none; }
-
-  .prev-val { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.04); }
-  .prev-val span { color: var(--accent-a); }
-
-  .save-btn {
-    width: 100%;
-    background: var(--accent-a);
-    color: var(--black);
-    border: none;
-    border-radius: 10px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-    padding: 16px;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: opacity 0.2s;
-  }
-  .save-btn:hover { opacity: 0.88; }
-  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .body-stats-card { background: linear-gradient(135deg, rgba(200,242,90,0.05), rgba(200,242,90,0.01)); border: 1px solid rgba(200,242,90,0.2); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
-  .body-stats-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent-a); letter-spacing: 1px; margin-bottom: 14px; }
-  .body-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .bs-field { display: flex; flex-direction: column; gap: 4px; }
-  .bs-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--success);
-    color: var(--black);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    transition: transform 0.3s ease;
-    z-index: 999;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.error { background: var(--danger); color: var(--white); }
-
-  /* ── PROGRESS VIEW ── */
-  .prog-view { padding: 28px; }
-  .prog-header { margin-bottom: 24px; }
-  .prog-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--white); letter-spacing: 1px; }
-  .prog-header p { font-size: 13px; color: var(--muted2); margin-top: 4px; }
-
-  .chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; margin-bottom: 32px; }
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-  .chart-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--white); letter-spacing: 1px; margin-bottom: 4px; }
-  .chart-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
-  .chart-canvas-wrap { position: relative; height: 180px; }
-  .chart-best { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 10px; }
-  .chart-best span { color: var(--accent-a); }
-
-  .body-stats-prog { margin-bottom: 32px; }
-  .bsp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-  .bsp-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-  .bsp-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  .bsp-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); }
-  .bsp-unit { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-left: 3px; }
-  .bsp-change { font-size: 12px; margin-top: 4px; }
-  .bsp-change.up { color: var(--success); }
-  .bsp-change.down { color: var(--danger); }
-  .bsp-change.neutral { color: var(--muted); }
-
-  .history-table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 40px; }
-  .history-table-hdr { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .history-table-hdr h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--white); letter-spacing: 1px; }
-  .htable { width: 100%; border-collapse: collapse; }
-  .htable th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
-  .htable td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-  .htable tr:last-child td { border-bottom: none; }
-  .htable tr:hover td { background: rgba(255,255,255,0.015); }
-  .sess-badge { font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
-  .sess-badge.A { background: rgba(200,242,90,0.12); color: var(--accent-a); }
-  .sess-badge.B { background: rgba(90,180,242,0.12); color: var(--accent-b); }
-  .sess-badge.C { background: rgba(242,146,90,0.12); color: var(--accent-c); }
-
-  .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
-  .empty-state .emoji { font-size: 36px; margin-bottom: 12px; }
-  .empty-state p { font-size: 13px; line-height: 1.6; }
-
-  .loading { text-align: center; padding: 40px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 2px; }
-
-  @media (max-width: 600px) {
-    .hero { padding: 28px 20px; }
-    .p-section { padding: 28px 16px 0; }
-    .log-view, .prog-view { padding: 20px 16px; }
-    .nav-brand { font-size: 16px; padding: 0 12px; }
-    .week-row { grid-template-columns: repeat(4,1fr); }
-    .set-row.type-weight-reps { grid-template-columns: 40px 1fr 1fr; }
-    .chart-grid { grid-template-columns: 1fr; }
-    .body-stats-grid { grid-template-columns: 1fr; }
-    .session-hdr { flex-direction: column; }
-  }
+:root {
+--black: #0a0a0a;
+--dark: #111111;
+--card: #181818;
+--card2: #1e1e1e;
+--border: #2a2a2a;
+--text: #e8e4dc;
+--muted: #666;
+--muted2: #888;
+--accent-a: #c8f25a;
+--accent-b: #5ab4f2;
+--accent-c: #f2925a;
+--accent-r: #f25a7a;
+--white: #ffffff;
+--success: #4ade80;
+--danger: #f87171;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+background: var(--black);
+color: var(--text);
+font-family: 'DM Sans', sans-serif;
+display: flex;
+flex-direction: column;
+min-height: 100vh;
+}
+/* ── NAV ── */
+.nav {
+background: var(--dark);
+border-bottom: 1px solid var(--border);
+display: flex;
+align-items: stretch;
+position: sticky;
+top: 0;
+z-index: 100;
+}
+.nav-brand {
+font-family: 'Bebas Neue', sans-serif;
+font-size: 20px;
+letter-spacing: 2px;
+color: var(--accent-a);
+padding: 0 20px;
+display: flex;
+align-items: center;
+border-right: 1px solid var(--border);
+white-space: nowrap;
+}
+.nav-tabs { display: flex; flex: 1; }
+.nav-tab {
+flex: 1;
+background: none;
+border: none;
+border-bottom: 3px solid transparent;
+color: var(--muted);
+font-family: 'DM Mono', monospace;
+font-size: 11px;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+padding: 16px 12px 13px;
+transition: all 0.2s;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--white); border-bottom-color: var(--accent-a); }
+.nav-status {
+padding: 0 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+font-family: 'DM Mono', monospace;
+font-size: 10px;
+color: var(--muted);
+border-left: 1px solid var(--border);
+}
+.status-dot {
+width: 7px; height: 7px;
+border-radius: 50%;
+background: var(--muted);
+}
+.status-dot.ok { background: var(--success); box-shadow: 0 0 6px var(--success); }
+.status-dot.err { background: var(--danger); }
+/* ── VIEWS ── */
+.view { display: none; flex: 1; overflow-y: auto; }
+.view.active { display: block; }
+/* ── PROGRAM VIEW ── */
+.hero {
+background: var(--dark);
+border-bottom: 1px solid var(--border);
+padding: 40px 32px 32px;
+position: relative;
+overflow: hidden;
+}
+.hero::before {
+content: '';
+position: absolute;
+top: -60px; right: -60px;
+width: 260px; height: 260px;
+border-radius: 50%;
+background: radial-gradient(circle, rgba(200,242,90,0.07) 0%, transparent 70%);
+pointer-events: none;
+}
+.hero-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-a); margin-bottom: 10px; }
+.hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 8vw, 72px); line-height: 0.95; color: var(--white); }
+.hero h1 span { color: var(--accent-a); }
+.hero-sub { margin-top: 12px; font-size: 13px; color: var(--muted2); max-width: 460px; line-height: 1.6; }
+.stats-strip { display: flex; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.stat-item { flex: 1; min-width: 110px; padding: 18px 20px; border-right: 1px solid var(--border); }
+.stat-item:last-child { border-right: none; }
+.stat-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--white); }
+.stat-unit { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-left: 3px; }
+.week-row { display: grid; grid-template-columns: repeat(7,1fr); border-bottom: 1px solid var(--border); }
+.week-day { padding: 14px 10px; border-right: 1px solid var(--border); text-align: center; }
+.week-day:last-child { border-right: none; }
+.day-name { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.day-badge { display: inline-block; font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 1px; padding: 3px 9px; border-radius: 4px; white-space: nowrap; margin-bottom: 4px; }
+.badge-rest { background: var(--border); color: var(--muted); }
+.badge-a { background: rgba(200,242,90,0.12); color: var(--accent-a); border: 1px solid rgba(200,242,90,0.25); }
+.badge-b { background: rgba(90,180,242,0.12); color: var(--accent-b); border: 1px solid rgba(90,180,242,0.25); }
+.badge-c { background: rgba(242,146,90,0.12); color: var(--accent-c); border: 1px solid rgba(242,146,90,0.25); }
+.badge-rugby { background: rgba(242,90,122,0.12); color: var(--accent-r); border: 1px solid rgba(242,90,122,0.25); }
+.p-section { padding: 40px 28px 0; }
+.p-section-hdr { display: flex; align-items: baseline; gap: 14px; margin-bottom: 20px; }
+.p-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+.p-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--white); letter-spacing: 1px; }
+.session-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+.session-hdr { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; }
+.session-hdr.a { border-left: 4px solid var(--accent-a); }
+.session-hdr.b { border-left: 4px solid var(--accent-b); }
+.session-hdr.c { border-left: 4px solid var(--accent-c); }
+.s-day { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.s-title { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--white); letter-spacing: 1px; }
+.s-sub { font-size: 12px; color: var(--muted2); margin-top: 5px; line-height: 1.5; max-width: 440px; }
+.s-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); line-height: 1.9; text-align: right; white-space: nowrap; }
+.s-meta span { color: var(--text); }
+.ex-table { width: 100%; border-collapse: collapse; }
+.ex-table th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+.ex-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+.ex-table tr:last-child td { border-bottom: none; }
+.ex-table tr:hover td { background: rgba(255,255,255,0.015); }
+.ex-name { font-weight: 600; color: var(--white); font-size: 13px; margin-bottom: 3px; }
+.ex-cue { font-size: 12px; color: var(--muted2); line-height: 1.5; max-width: 320px; }
+.ex-sets { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); }
+.ex-rest { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.ex-note { font-size: 11px; color: var(--muted); font-style: italic; line-height: 1.5; }
+.ktag { display: inline-block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; background: rgba(200,242,90,0.08); color: var(--accent-a); border: 1px solid rgba(200,242,90,0.18); margin-bottom: 4px; }
+.rules-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.rules-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--white); letter-spacing: 1px; margin-bottom: 14px; }
+.rule-row { display: flex; gap: 12px; margin-bottom: 10px; font-size: 13px; line-height: 1.6; }
+.rule-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent-a); min-width: 22px; padding-top: 2px; }
+.protein-box { background: linear-gradient(135deg, rgba(200,242,90,0.05), rgba(200,242,90,0.01)); border: 1px solid rgba(200,242,90,0.18); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.protein-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent-a); letter-spacing: 1px; margin-bottom: 4px; }
+.protein-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--white); line-height: 1; margin: 6px 0; }
+.protein-num span { font-size: 18px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+.protein-note { font-size: 13px; color: var(--muted2); line-height: 1.6; margin-top: 8px; }
+.phase-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 40px; }
+.phase-box h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--white); letter-spacing: 1px; margin-bottom: 14px; }
+.phase-row { display: grid; grid-template-columns: 90px 1fr; gap: 14px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.phase-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.phase-lbl { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent-a); text-transform: uppercase; letter-spacing: 1px; padding-top: 2px; }
+.phase-desc { font-size: 13px; color: var(--text); line-height: 1.6; }
+/* ── LOG VIEW ── */
+.log-view { padding: 28px; max-width: 700px; margin: 0 auto; }
+.log-header { margin-bottom: 24px; }
+.log-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--white); letter-spacing: 1px; }
+.log-header p { font-size: 13px; color: var(--muted2); margin-top: 4px; }
+.session-picker { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 28px; }
+.session-btn {
+background: var(--card);
+border: 2px solid var(--border);
+border-radius: 10px;
+padding: 16px 10px;
+cursor: pointer;
+text-align: center;
+transition: all 0.2s;
+}
+.session-btn:hover { border-color: var(--muted); }
+.session-btn.selected-a { border-color: var(--accent-a); background: rgba(200,242,90,0.06); }
+.session-btn.selected-b { border-color: var(--accent-b); background: rgba(90,180,242,0.06); }
+.session-btn.selected-c { border-color: var(--accent-c); background: rgba(242,146,90,0.06); }
+.sb-label { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); letter-spacing: 1px; }
+.sb-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+.sb-day { font-size: 11px; color: var(--muted2); margin-top: 5px; }
+.log-date-row { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.log-date-row label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+.log-date-row input { background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 8px 12px; outline: none; }
+.log-date-row input:focus { border-color: var(--accent-a); }
+.log-notes-row { margin-bottom: 24px; }
+.log-notes-row label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 6px; }
+.log-notes-row textarea { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px 12px; outline: none; resize: vertical; min-height: 60px; }
+.log-notes-row textarea:focus { border-color: var(--accent-a); }
+.ex-log-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+.ex-log-hdr { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+.ex-log-name { font-weight: 600; color: var(--white); font-size: 14px; }
+.ex-log-spec { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.ex-skip { background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; cursor: pointer; transition: all 0.15s; }
+.ex-skip:hover { border-color: var(--muted); color: var(--text); }
+.ex-skip.skipped { background: rgba(248,113,113,0.1); border-color: var(--danger); color: var(--danger); }
+.ex-log-body { padding: 14px 18px; }
+.sets-grid { display: grid; gap: 8px; }
+.set-row { display: grid; gap: 8px; align-items: center; }
+.set-row.type-reps { grid-template-columns: 50px 1fr; }
+.set-row.type-weight-reps { grid-template-columns: 50px 1fr 1fr; }
+.set-row.type-time { grid-template-columns: 50px 1fr; }
+.set-row.type-reps-depth { grid-template-columns: 50px 1fr 1fr; }
+.set-row.type-weight-reps-side { grid-template-columns: 50px 1fr 1fr; }
+.set-lbl { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.set-input-wrap { display: flex; flex-direction: column; gap: 2px; }
+.set-input-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.set-input {
+background: var(--card2);
+border: 1px solid var(--border);
+border-radius: 6px;
+color: var(--white);
+font-family: 'DM Mono', monospace;
+font-size: 14px;
+padding: 8px 10px;
+outline: none;
+width: 100%;
+transition: border-color 0.15s;
+}
+.set-input:focus { border-color: var(--accent-a); }
+.set-input::placeholder { color: var(--muted); font-size: 12px; }
+.set-input.skipped-input { opacity: 0.3; pointer-events: none; }
+.prev-val { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.04); }
+.prev-val span { color: var(--accent-a); }
+.save-btn {
+width: 100%;
+background: var(--accent-a);
+color: var(--black);
+border: none;
+border-radius: 10px;
+font-family: 'Bebas Neue', sans-serif;
+font-size: 22px;
+letter-spacing: 2px;
+padding: 16px;
+cursor: pointer;
+margin-top: 8px;
+transition: opacity 0.2s;
+}
+.save-btn:hover { opacity: 0.88; }
+.save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.body-stats-card { background: linear-gradient(135deg, rgba(200,242,90,0.05), rgba(200,242,90,0.01)); border: 1px solid rgba(200,242,90,0.2); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+.body-stats-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent-a); letter-spacing: 1px; margin-bottom: 14px; }
+.body-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bs-field { display: flex; flex-direction: column; gap: 4px; }
+.bs-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.toast {
+position: fixed;
+bottom: 24px;
+left: 50%;
+transform: translateX(-50%) translateY(80px);
+background: var(--success);
+color: var(--black);
+font-family: 'DM Mono', monospace;
+font-size: 13px;
+font-weight: 500;
+letter-spacing: 1px;
+padding: 12px 24px;
+border-radius: 8px;
+transition: transform 0.3s ease;
+z-index: 999;
+white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--danger); color: var(--white); }
+/* ── PROGRESS VIEW ── */
+.prog-view { padding: 28px; }
+.prog-header { margin-bottom: 24px; }
+.prog-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--white); letter-spacing: 1px; }
+.prog-header p { font-size: 13px; color: var(--muted2); margin-top: 4px; }
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.chart-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--white); letter-spacing: 1px; margin-bottom: 4px; }
+.chart-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.chart-canvas-wrap { position: relative; height: 180px; }
+.chart-best { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 10px; }
+.chart-best span { color: var(--accent-a); }
+.body-stats-prog { margin-bottom: 32px; }
+.bsp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.bsp-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.bsp-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.bsp-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); }
+.bsp-unit { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-left: 3px; }
+.bsp-change { font-size: 12px; margin-top: 4px; }
+.bsp-change.up { color: var(--success); }
+.bsp-change.down { color: var(--danger); }
+.bsp-change.neutral { color: var(--muted); }
+.history-table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 40px; }
+.history-table-hdr { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.history-table-hdr h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--white); letter-spacing: 1px; }
+.htable { width: 100%; border-collapse: collapse; }
+.htable th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+.htable td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.htable tr:last-child td { border-bottom: none; }
+.htable tr:hover td { background: rgba(255,255,255,0.015); }
+.sess-badge { font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.sess-badge.A { background: rgba(200,242,90,0.12); color: var(--accent-a); }
+.sess-badge.B { background: rgba(90,180,242,0.12); color: var(--accent-b); }
+.sess-badge.C { background: rgba(242,146,90,0.12); color: var(--accent-c); }
+.empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
+.empty-state .emoji { font-size: 36px; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; line-height: 1.6; }
+.loading { text-align: center; padding: 40px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 2px; }
+@media (max-width: 600px) {
+.hero { padding: 28px 20px; }
+.p-section { padding: 28px 16px 0; }
+.log-view, .prog-view { padding: 20px 16px; }
+.nav-brand { font-size: 16px; padding: 0 12px; }
+.week-row { grid-template-columns: repeat(4,1fr); }
+.set-row.type-weight-reps { grid-template-columns: 40px 1fr 1fr; }
+.chart-grid { grid-template-columns: 1fr; }
+.body-stats-grid { grid-template-columns: 1fr; }
+.session-hdr { flex-direction: column; }
+}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-brand">BIF</div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showView('program')">📋 Program</button>
-    <button class="nav-tab" onclick="showView('log')">✏️ Log</button>
-    <button class="nav-tab" onclick="showView('progress')">📈 Progress</button>
-  </div>
-  <div class="nav-status">
-    <div class="status-dot" id="dbDot"></div>
-    <span id="dbLabel">connecting</span>
-  </div>
+<div class="nav-brand">BIF</div>
+<div class="nav-tabs">
+<button class="nav-tab active" onclick="showView('program')">📋 Program</button>
+<button class="nav-tab" onclick="showView('log')">✏️ Log</button>
+<button class="nav-tab" onclick="showView('progress')">📈 Progress</button>
+</div>
+<div class="nav-status">
+<div class="status-dot" id="dbDot"></div>
+<span id="dbLabel">connecting</span>
+</div>
 </nav>
 
 <!-- TOAST -->
@@ -374,224 +346,212 @@
 
 <!-- ════════════════════════════════ PROGRAM VIEW ════════════════════════════════ -->
 <div class="view active" id="view-program">
+<div class="hero">
+<div class="hero-label">Week 1 · Training Program</div>
+<h1>BACK<br>IN <span>FORM</span></h1>
+<p class="hero-sub">3 sessions/week · Knee-first · Built around Saturday rugby · Every number tracked.</p>
+</div>
+<div class="stats-strip">
+<div class="stat-item"><div class="stat-label">Weight</div><div class="stat-value">100<span class="stat-unit">kg</span></div></div>
+<div class="stat-item"><div class="stat-label">Height</div><div class="stat-value">180<span class="stat-unit">cm</span></div></div>
+<div class="stat-item"><div class="stat-label">Age</div><div class="stat-value">51<span class="stat-unit">yrs</span></div></div>
+<div class="stat-item"><div class="stat-label">Protein Target</div><div class="stat-value">160<span class="stat-unit">g/day</span></div></div>
+<div class="stat-item"><div class="stat-label">Sessions/Week</div><div class="stat-value">3</div></div>
+<div class="stat-item"><div class="stat-label">Phase</div><div class="stat-value" style="font-size:16px;padding-top:6px">FOUNDATION</div></div>
+</div>
+<div class="week-row">
+<div class="week-day"><div class="day-name">Mon</div><div class="day-badge badge-rest">REST</div></div>
+<div class="week-day"><div class="day-name">Tue</div><div class="day-badge badge-a">DAY A</div></div>
+<div class="week-day"><div class="day-name">Wed</div><div class="day-badge badge-rest">REST</div></div>
+<div class="week-day"><div class="day-name">Thu</div><div class="day-badge badge-b">DAY B</div></div>
+<div class="week-day"><div class="day-name">Fri</div><div class="day-badge badge-rest">REST</div></div>
+<div class="week-day"><div class="day-name">Sat</div><div class="day-badge badge-c" style="margin-bottom:4px">DAY C</div><br><div class="day-badge badge-rugby">RUGBY</div></div>
+<div class="week-day"><div class="day-name">Sun</div><div class="day-badge badge-rest">REST</div></div>
+</div>
 
-  <div class="hero">
-    <div class="hero-label">Week 1 · Training Program</div>
-    <h1>BACK<br>IN <span>FORM</span></h1>
-    <p class="hero-sub">3 sessions/week · Knee-first · Built around Saturday rugby · Every number tracked.</p>
-  </div>
+<!-- SESSION A -->
+<div class="p-section">
+<div class="p-section-hdr"><div class="p-tag">Tuesday</div><div class="p-title" style="color:var(--accent-a)">SESSION A — KNEE FIRST</div></div>
+<div class="session-card">
+<div class="session-hdr a">
+<div><div class="s-day" style="color:var(--accent-a)">Tuesday · Knee Rehab & Lower Body</div><div class="s-title">KNEE FIRST</div><div class="s-sub">Your most important session. Patient, methodical, progressive. Every rep rebuilds the foundation everything else stands on.</div></div>
+<div class="s-meta">Duration: <span>45–55 min</span><br>Intensity: <span>Low–Moderate</span><br>Focus: <span>Knee rehab, glutes, legs</span></div>
+</div>
+<table class="ex-table">
+<thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><div class="ktag">Warmup</div><div class="ex-name">Supine Leg Raises</div><div class="ex-cue">Lying flat, raise straight legs to 45°. Wakes up hip flexors and quad connection without loading knees.</div></td><td><div class="ex-sets">2 × 15</div></td><td><div class="ex-rest">30s</div></td><td><div class="ex-note">Slow and controlled.</div></td></tr>
+<tr><td><div class="ktag">Knee</div><div class="ex-name">Wall Sit Hold</div><div class="ex-cue">Back flat on wall, thighs parallel to floor (or as low as comfortable). Primary knee benchmark.</div></td><td><div class="ex-sets">3 × max hold</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record time. 20s wk1 → 60s+ wk8</div></td></tr>
+<tr><td><div class="ktag">Knee</div><div class="ex-name">Terminal Knee Extension (TKE)</div><div class="ex-cue">Band at knee height. Stand facing anchor, slight bend in knee, press straight against band. Key VMO activator.</div></td><td><div class="ex-sets">3 × 15 each leg</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Slow controlled extension.</div></td></tr>
+<tr><td><div class="ktag">Knee</div><div class="ex-name">Box Squat (to chair/bench)</div><div class="ex-cue">Squat to surface ~45cm, touch and stand. No bounce. Bodyweight only week 1.</div></td><td><div class="ex-sets">3 × 8</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Note depth comfort 1–10. Lower surface 2cm/2 wks.</div></td></tr>
+<tr><td><div class="ex-name">Glute Bridge</div><div class="ex-cue">Lying on back, feet flat, drive hips to ceiling. Squeeze hard at top. Strong glutes protect knees directly.</div></td><td><div class="ex-sets">3 × 15</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">Week 3+: barbell across hips.</div></td></tr>
+<tr><td><div class="ex-name">Reverse Lunge</div><div class="ex-cue">Step BACK — far lower load on knee joint. Front shin as vertical as possible.</div></td><td><div class="ex-sets">3 × 8 each leg</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">Stop if sharp knee pain. Soreness ≠ pain.</div></td></tr>
+<tr><td><div class="ex-name">Calf Raise (single leg)</div><div class="ex-cue">Hold wall for balance. Rise on one foot, lower slowly (3s down).</div></td><td><div class="ex-sets">3 × 12 each</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Add weight when 3×15 feels easy.</div></td></tr>
+<tr><td><div class="ex-name">Dead Bug</div><div class="ex-cue">Lying on back, arms up, knees 90°. Lower opposite arm/leg without arching back.</div></td><td><div class="ex-sets">3 × 8 each side</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">3 seconds each direction.</div></td></tr>
+</tbody>
+</table>
+</div>
 
-  <div class="stats-strip">
-    <div class="stat-item"><div class="stat-label">Weight</div><div class="stat-value">100<span class="stat-unit">kg</span></div></div>
-    <div class="stat-item"><div class="stat-label">Height</div><div class="stat-value">180<span class="stat-unit">cm</span></div></div>
-    <div class="stat-item"><div class="stat-label">Age</div><div class="stat-value">51<span class="stat-unit">yrs</span></div></div>
-    <div class="stat-item"><div class="stat-label">Protein Target</div><div class="stat-value">160<span class="stat-unit">g/day</span></div></div>
-    <div class="stat-item"><div class="stat-label">Sessions/Week</div><div class="stat-value">3</div></div>
-    <div class="stat-item"><div class="stat-label">Phase</div><div class="stat-value" style="font-size:16px;padding-top:6px">FOUNDATION</div></div>
-  </div>
+<!-- SESSION B -->
+<div class="p-section-hdr" style="margin-top:12px"><div class="p-tag">Thursday</div><div class="p-title" style="color:var(--accent-b)">SESSION B — PUSH & CORE</div></div>
+<div class="session-card">
+<div class="session-hdr b">
+<div><div class="s-day" style="color:var(--accent-b)">Thursday · Push & Core</div><div class="s-title">PUSH & CORE</div><div class="s-sub">Full upper body pressing. Chest, shoulders, triceps — the complete push pattern. Compound first, isolation last, core throughout.</div></div>
+<div class="s-meta">Duration: <span>45–55 min</span><br>Intensity: <span>Moderate</span><br>Focus: <span>Chest, shoulders, triceps, core</span></div>
+</div>
+<table class="ex-table">
+<thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><div class="ktag">Warmup</div><div class="ex-name">Band Pull-Aparts + Arm Circles</div><div class="ex-cue">15 pull-aparts + 10 arm circles each direction. Gets blood into the shoulder before pressing.</div></td><td><div class="ex-sets">2 × 15</div></td><td><div class="ex-rest">—</div></td><td><div class="ex-note">Never skip. 3 mins.</div></td></tr>
+<tr><td><div class="ex-name">Barbell Bench Press</div><div class="ex-cue">Full range — bar touches chest, full lockout. Grip just outside shoulder width. Plant feet, slight arch.</div></td><td><div class="ex-sets">4 × 8</div></td><td><div class="ex-rest">2 min</div></td><td><div class="ex-note">📊 Record weight. Start 40–50kg. +2.5kg when 4×8 feels controlled.</div></td></tr>
+<tr><td><div class="ex-name">Standing Barbell OHP</div><div class="ex-cue">Front rack, press to full lockout overhead. Core braced hard. The king of shoulder strength.</div></td><td><div class="ex-sets">3 × 8</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record weight. Start 20–30kg. Form over load always.</div></td></tr>
+<tr><td><div class="ex-name">Weighted Dips</div><div class="ex-cue">Parallel bars or chairs. Add weight between thighs when bodyweight is easy. Full depth.</div></td><td><div class="ex-sets">3 × max</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Reps + added weight. BW first → load at 3×12.</div></td></tr>
+<tr><td><div class="ex-name">Push-Up (floor, full range)</div><div class="ex-cue">Chest to floor, full lockout at top. Body rigid. Your bodyweight benchmark.</div></td><td><div class="ex-sets">3 × max</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">📊 Record reps. 10+ wk1 → 25+ wk12.</div></td></tr>
+<tr><td><div class="ex-name">Plank Hold</div><div class="ex-cue">Forearm plank. Squeeze everything. Don't let hips sag or pike.</div></td><td><div class="ex-sets">3 × max hold</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">📊 Record time. 30s wk1 → 2min+ month 3.</div></td></tr>
+<tr><td><div class="ex-name">Pallof Press</div><div class="ex-cue">Band anchored to side. Hold at chest, press out and return. Anti-rotation core — critical for rugby.</div></td><td><div class="ex-sets">3 × 10 each side</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Challenge is stillness, not force.</div></td></tr>
+<tr><td><div class="ex-name">Hollow Body Hold</div><div class="ex-cue">Back flat on floor, arms overhead, legs ~30cm raised. Hold.</div></td><td><div class="ex-sets">3 × 20s hold</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Lower back must stay down. Bend knees to regress.</div></td></tr>
+</tbody>
+</table>
+</div>
 
-  <div class="week-row">
-    <div class="week-day"><div class="day-name">Mon</div><div class="day-badge badge-rest">REST</div></div>
-    <div class="week-day"><div class="day-name">Tue</div><div class="day-badge badge-a">DAY A</div></div>
-    <div class="week-day"><div class="day-name">Wed</div><div class="day-badge badge-rest">REST</div></div>
-    <div class="week-day"><div class="day-name">Thu</div><div class="day-badge badge-b">DAY B</div></div>
-    <div class="week-day"><div class="day-name">Fri</div><div class="day-badge badge-rest">REST</div></div>
-    <div class="week-day"><div class="day-name">Sat</div><div class="day-badge badge-c" style="margin-bottom:4px">DAY C</div><br><div class="day-badge badge-rugby">RUGBY</div></div>
-    <div class="week-day"><div class="day-name">Sun</div><div class="day-badge badge-rest">REST</div></div>
-  </div>
+<!-- SESSION C -->
+<div class="p-section-hdr" style="margin-top:12px"><div class="p-tag">Saturday 8–9am</div><div class="p-title" style="color:var(--accent-c)">SESSION C — PULL & HINGE</div></div>
+<div class="session-card">
+<div class="session-hdr c">
+<div><div class="s-day" style="color:var(--accent-c)">Saturday · Pull & Hinge · Pre-Rugby</div><div class="s-title">PULL & HINGE</div><div class="s-sub">Warms up exactly what rugby demands. Keep intensity at 70% — you have rugby in 2 hours.</div></div>
+<div class="s-meta">Duration: <span>40–45 min</span><br>Intensity: <span>70% max</span><br>Focus: <span>Back, hamstrings, hinge</span></div>
+</div>
+<table class="ex-table">
+<thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><div class="ktag">Warmup</div><div class="ex-name">Hip 90/90 + World's Greatest Stretch</div><div class="ex-cue">5 mins. Gets everything primed for rugby.</div></td><td><div class="ex-sets">2 × 5 each side</div></td><td><div class="ex-rest">—</div></td><td><div class="ex-note">Move fluidly.</div></td></tr>
+<tr><td><div class="ex-name">Romanian Deadlift (RDL)</div><div class="ex-cue">Hinge at hips, bar tracks down legs, feel hamstrings load, drive hips forward to stand.</div></td><td><div class="ex-sets">3 × 8</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record weight. Start 40–50kg. +5kg/2wks.</div></td></tr>
+<tr><td><div class="ex-name">Barbell Bent-Over Row</div><div class="ex-cue">Hinge to 45°, row bar to lower chest. Elbows drive back, not up.</div></td><td><div class="ex-sets">3 × 10</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record weight. Start 30–40kg.</div></td></tr>
+<tr><td><div class="ex-name">Single Arm DB Row</div><div class="ex-cue">Knee and hand on bench. Pull to hip, not shoulder. Exposes side-to-side imbalances.</div></td><td><div class="ex-sets">3 × 10 each arm</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">Control only. No jerking.</div></td></tr>
+<tr><td><div class="ex-name">Face Pull (band)</div><div class="ex-cue">Band at face height, pull to face with elbows high and wide. Shoulder health and external rotation.</div></td><td><div class="ex-sets">3 × 15</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Light resistance. High reps.</div></td></tr>
+<tr><td><div class="ex-name">Inverted Row</div><div class="ex-cue">Bar at hip height, lie underneath, pull chest to bar with straight body.</div></td><td><div class="ex-sets">3 × max</div></td><td><div class="ex-rest">75s</div></td><td><div class="ex-note">📊 Record reps. Lower bar = harder.</div></td></tr>
+<tr><td><div class="ex-name">Farmer's Carry</div><div class="ex-cue">Heavy dumbbells/plates in each hand, walk 20m. Grip, core, rugby contact strength.</div></td><td><div class="ex-sets">3 × 20m</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">📊 Record weight per hand. Stand tall.</div></td></tr>
+</tbody>
+</table>
+</div>
 
-  <!-- SESSION A -->
-  <div class="p-section">
-    <div class="p-section-hdr"><div class="p-tag">Tuesday</div><div class="p-title" style="color:var(--accent-a)">SESSION A — KNEE FIRST</div></div>
-    <div class="session-card">
-      <div class="session-hdr a">
-        <div><div class="s-day" style="color:var(--accent-a)">Tuesday · Knee Rehab & Lower Body</div><div class="s-title">KNEE FIRST</div><div class="s-sub">Your most important session. Patient, methodical, progressive. Every rep rebuilds the foundation everything else stands on.</div></div>
-        <div class="s-meta">Duration: <span>45–55 min</span><br>Intensity: <span>Low–Moderate</span><br>Focus: <span>Knee rehab, glutes, legs</span></div>
-      </div>
-      <table class="ex-table">
-        <thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td><div class="ktag">Warmup</div><div class="ex-name">Supine Leg Raises</div><div class="ex-cue">Lying flat, raise straight legs to 45°. Wakes up hip flexors and quad connection without loading knees.</div></td><td><div class="ex-sets">2 × 15</div></td><td><div class="ex-rest">30s</div></td><td><div class="ex-note">Slow and controlled.</div></td></tr>
-          <tr><td><div class="ktag">Knee</div><div class="ex-name">Wall Sit Hold</div><div class="ex-cue">Back flat on wall, thighs parallel to floor (or as low as comfortable). Primary knee benchmark.</div></td><td><div class="ex-sets">3 × max hold</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record time. 20s wk1 → 60s+ wk8</div></td></tr>
-          <tr><td><div class="ktag">Knee</div><div class="ex-name">Terminal Knee Extension (TKE)</div><div class="ex-cue">Band at knee height. Stand facing anchor, slight bend in knee, press straight against band. Key VMO activator.</div></td><td><div class="ex-sets">3 × 15 each leg</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Slow controlled extension.</div></td></tr>
-          <tr><td><div class="ktag">Knee</div><div class="ex-name">Box Squat (to chair/bench)</div><div class="ex-cue">Squat to surface ~45cm, touch and stand. No bounce. Bodyweight only week 1.</div></td><td><div class="ex-sets">3 × 8</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Note depth comfort 1–10. Lower surface 2cm/2 wks.</div></td></tr>
-          <tr><td><div class="ex-name">Glute Bridge</div><div class="ex-cue">Lying on back, feet flat, drive hips to ceiling. Squeeze hard at top. Strong glutes protect knees directly.</div></td><td><div class="ex-sets">3 × 15</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">Week 3+: barbell across hips.</div></td></tr>
-          <tr><td><div class="ex-name">Reverse Lunge</div><div class="ex-cue">Step BACK — far lower load on knee joint. Front shin as vertical as possible.</div></td><td><div class="ex-sets">3 × 8 each leg</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">Stop if sharp knee pain. Soreness ≠ pain.</div></td></tr>
-          <tr><td><div class="ex-name">Calf Raise (single leg)</div><div class="ex-cue">Hold wall for balance. Rise on one foot, lower slowly (3s down).</div></td><td><div class="ex-sets">3 × 12 each</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Add weight when 3×15 feels easy.</div></td></tr>
-          <tr><td><div class="ex-name">Dead Bug</div><div class="ex-cue">Lying on back, arms up, knees 90°. Lower opposite arm/leg without arching back.</div></td><td><div class="ex-sets">3 × 8 each side</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">3 seconds each direction.</div></td></tr>
-        </tbody>
-      </table>
-    </div>
+<!-- RULES -->
+<div class="rules-box">
+<h3>THE NON-NEGOTIABLES</h3>
+<div class="rule-row"><div class="rule-num">01</div><div>Muscle soreness the next day = good. Sharp joint pain during = stop immediately.</div></div>
+<div class="rule-row"><div class="rule-num">02</div><div>Session C is 70% effort max. You have rugby in 2 hours.</div></div>
+<div class="rule-row"><div class="rule-num">03</div><div>Add load only when the current weight feels controlled for 2 consecutive sessions.</div></div>
+<div class="rule-row"><div class="rule-num">04</div><div>Walk 20–30 mins on rest days. Active recovery beats the couch.</div></div>
+<div class="rule-row"><div class="rule-num">05</div><div>7–8hrs sleep is more anabolic than any supplement.</div></div>
+<div class="rule-row"><div class="rule-num">06</div><div>The squat comes back at 12–16 weeks done right — not 2 weeks done wrong.</div></div>
+</div>
 
-    <!-- SESSION B -->
-    <div class="p-section-hdr" style="margin-top:12px"><div class="p-tag">Thursday</div><div class="p-title" style="color:var(--accent-b)">SESSION B — PUSH & CORE</div></div>
-    <div class="session-card">
-      <div class="session-hdr b">
-        <div><div class="s-day" style="color:var(--accent-b)">Thursday · Push & Core</div><div class="s-title">PUSH & CORE</div><div class="s-sub">Full upper body pressing. Chest, shoulders, triceps — the complete push pattern. Compound first, isolation last, core throughout.</div></div>
-        <div class="s-meta">Duration: <span>45–55 min</span><br>Intensity: <span>Moderate</span><br>Focus: <span>Chest, shoulders, triceps, core</span></div>
-      </div>
-      <table class="ex-table">
-        <thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td><div class="ktag">Warmup</div><div class="ex-name">Band Pull-Aparts + Arm Circles</div><div class="ex-cue">15 pull-aparts + 10 arm circles each direction. Gets blood into the shoulder before pressing.</div></td><td><div class="ex-sets">2 × 15</div></td><td><div class="ex-rest">—</div></td><td><div class="ex-note">Never skip. 3 mins.</div></td></tr>
-          <tr><td><div class="ex-name">Barbell Bench Press</div><div class="ex-cue">Full range — bar touches chest, full lockout. Grip just outside shoulder width. Plant feet, slight arch.</div></td><td><div class="ex-sets">4 × 8</div></td><td><div class="ex-rest">2 min</div></td><td><div class="ex-note">📊 Record weight. Start 40–50kg. +2.5kg when 4×8 feels controlled.</div></td></tr>
-          <tr><td><div class="ex-name">Standing Barbell OHP</div><div class="ex-cue">Front rack, press to full lockout overhead. Core braced hard. The king of shoulder strength.</div></td><td><div class="ex-sets">3 × 8</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record weight. Start 20–30kg. Form over load always.</div></td></tr>
-          <tr><td><div class="ex-name">Weighted Dips</div><div class="ex-cue">Parallel bars or chairs. Add weight between thighs when bodyweight is easy. Full depth.</div></td><td><div class="ex-sets">3 × max</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Reps + added weight. BW first → load at 3×12.</div></td></tr>
-          <tr><td><div class="ex-name">Push-Up (floor, full range)</div><div class="ex-cue">Chest to floor, full lockout at top. Body rigid. Your bodyweight benchmark.</div></td><td><div class="ex-sets">3 × max</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">📊 Record reps. 10+ wk1 → 25+ wk12.</div></td></tr>
-          <tr><td><div class="ex-name">Plank Hold</div><div class="ex-cue">Forearm plank. Squeeze everything. Don't let hips sag or pike.</div></td><td><div class="ex-sets">3 × max hold</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">📊 Record time. 30s wk1 → 2min+ month 3.</div></td></tr>
-          <tr><td><div class="ex-name">Pallof Press</div><div class="ex-cue">Band anchored to side. Hold at chest, press out and return. Anti-rotation core — critical for rugby.</div></td><td><div class="ex-sets">3 × 10 each side</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Challenge is stillness, not force.</div></td></tr>
-          <tr><td><div class="ex-name">Hollow Body Hold</div><div class="ex-cue">Back flat on floor, arms overhead, legs ~30cm raised. Hold.</div></td><td><div class="ex-sets">3 × 20s hold</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Lower back must stay down. Bend knees to regress.</div></td></tr>
-        </tbody>
-      </table>
-    </div>
+<!-- PROTEIN -->
+<div class="protein-box">
+<h3>Daily Protein Goal</h3>
+<div class="protein-num">160g <span>per day</span></div>
+<p class="protein-note">1.6g/kg at 100kg. Spread across 4+ meals (~40g each). Prioritise eggs, chicken, beef, fish, Greek yoghurt, cottage cheese, whey. On rugby Saturdays: solid protein meal 2.5–3hrs before kickoff.</p>
+</div>
 
-    <!-- SESSION C -->
-    <div class="p-section-hdr" style="margin-top:12px"><div class="p-tag">Saturday 8–9am</div><div class="p-title" style="color:var(--accent-c)">SESSION C — PULL & HINGE</div></div>
-    <div class="session-card">
-      <div class="session-hdr c">
-        <div><div class="s-day" style="color:var(--accent-c)">Saturday · Pull & Hinge · Pre-Rugby</div><div class="s-title">PULL & HINGE</div><div class="s-sub">Warms up exactly what rugby demands. Keep intensity at 70% — you have rugby in 2 hours.</div></div>
-        <div class="s-meta">Duration: <span>40–45 min</span><br>Intensity: <span>70% max</span><br>Focus: <span>Back, hamstrings, hinge</span></div>
-      </div>
-      <table class="ex-table">
-        <thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td><div class="ktag">Warmup</div><div class="ex-name">Hip 90/90 + World's Greatest Stretch</div><div class="ex-cue">5 mins. Gets everything primed for rugby.</div></td><td><div class="ex-sets">2 × 5 each side</div></td><td><div class="ex-rest">—</div></td><td><div class="ex-note">Move fluidly.</div></td></tr>
-          <tr><td><div class="ex-name">Romanian Deadlift (RDL)</div><div class="ex-cue">Hinge at hips, bar tracks down legs, feel hamstrings load, drive hips forward to stand.</div></td><td><div class="ex-sets">3 × 8</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record weight. Start 40–50kg. +5kg/2wks.</div></td></tr>
-          <tr><td><div class="ex-name">Barbell Bent-Over Row</div><div class="ex-cue">Hinge to 45°, row bar to lower chest. Elbows drive back, not up.</div></td><td><div class="ex-sets">3 × 10</div></td><td><div class="ex-rest">90s</div></td><td><div class="ex-note">📊 Record weight. Start 30–40kg.</div></td></tr>
-          <tr><td><div class="ex-name">Single Arm DB Row</div><div class="ex-cue">Knee and hand on bench. Pull to hip, not shoulder. Exposes side-to-side imbalances.</div></td><td><div class="ex-sets">3 × 10 each arm</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">Control only. No jerking.</div></td></tr>
-          <tr><td><div class="ex-name">Face Pull (band)</div><div class="ex-cue">Band at face height, pull to face with elbows high and wide. Shoulder health and external rotation.</div></td><td><div class="ex-sets">3 × 15</div></td><td><div class="ex-rest">45s</div></td><td><div class="ex-note">Light resistance. High reps.</div></td></tr>
-          <tr><td><div class="ex-name">Inverted Row</div><div class="ex-cue">Bar at hip height, lie underneath, pull chest to bar with straight body.</div></td><td><div class="ex-sets">3 × max</div></td><td><div class="ex-rest">75s</div></td><td><div class="ex-note">📊 Record reps. Lower bar = harder.</div></td></tr>
-          <tr><td><div class="ex-name">Farmer's Carry</div><div class="ex-cue">Heavy dumbbells/plates in each hand, walk 20m. Grip, core, rugby contact strength.</div></td><td><div class="ex-sets">3 × 20m</div></td><td><div class="ex-rest">60s</div></td><td><div class="ex-note">📊 Record weight per hand. Stand tall.</div></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- RULES -->
-    <div class="rules-box">
-      <h3>THE NON-NEGOTIABLES</h3>
-      <div class="rule-row"><div class="rule-num">01</div><div>Muscle soreness the next day = good. Sharp joint pain during = stop immediately.</div></div>
-      <div class="rule-row"><div class="rule-num">02</div><div>Session C is 70% effort max. You have rugby in 2 hours.</div></div>
-      <div class="rule-row"><div class="rule-num">03</div><div>Add load only when the current weight feels controlled for 2 consecutive sessions.</div></div>
-      <div class="rule-row"><div class="rule-num">04</div><div>Walk 20–30 mins on rest days. Active recovery beats the couch.</div></div>
-      <div class="rule-row"><div class="rule-num">05</div><div>7–8hrs sleep is more anabolic than any supplement.</div></div>
-      <div class="rule-row"><div class="rule-num">06</div><div>The squat comes back at 12–16 weeks done right — not 2 weeks done wrong.</div></div>
-    </div>
-
-    <!-- PROTEIN -->
-    <div class="protein-box">
-      <h3>Daily Protein Goal</h3>
-      <div class="protein-num">160g <span>per day</span></div>
-      <p class="protein-note">1.6g/kg at 100kg. Spread across 4+ meals (~40g each). Prioritise eggs, chicken, beef, fish, Greek yoghurt, cottage cheese, whey. On rugby Saturdays: solid protein meal 2.5–3hrs before kickoff.</p>
-    </div>
-
-    <!-- PHASES -->
-    <div class="phase-box">
-      <h3>YOUR 16-WEEK MAP</h3>
-      <div class="phase-row"><div class="phase-lbl">Wks 1–4<br>Foundation</div><div class="phase-desc">Establish movement patterns. Bodyweight dominant. Build the habit. <strong>Knee benchmark: wall sit 20s→45s. Box squat to chair with confidence.</strong></div></div>
-      <div class="phase-row"><div class="phase-lbl">Wks 5–8<br>Load</div><div class="phase-desc">Introduce progressive loading. RDL, bench and rows all get heavier. <strong>Knee benchmark: box squat surface drops 10cm. First goblet squat attempt.</strong></div></div>
-      <div class="phase-row"><div class="phase-lbl">Wks 9–12<br>Strength</div><div class="phase-desc">Shift to 5×5 on main lifts. Introduce barbell back squat to box. <strong>Knee benchmark: squat to parallel with light load. Wall sit 60s+.</strong></div></div>
-      <div class="phase-row"><div class="phase-lbl">Wks 13–16<br>Performance</div><div class="phase-desc"><strong>Full squat returning.</strong> Rugby performance measurably better. Stats all trending up. Review, celebrate, set phase 2 goals.</div></div>
-    </div>
-  </div>
+<!-- PHASES -->
+<div class="phase-box">
+<h3>YOUR 16-WEEK MAP</h3>
+<div class="phase-row"><div class="phase-lbl">Wks 1–4<br>Foundation</div><div class="phase-desc">Establish movement patterns. Bodyweight dominant. Build the habit. <strong>Knee benchmark: wall sit 20s→45s. Box squat to chair with confidence.</strong></div></div>
+<div class="phase-row"><div class="phase-lbl">Wks 5–8<br>Load</div><div class="phase-desc">Introduce progressive loading. RDL, bench and rows all get heavier. <strong>Knee benchmark: box squat surface drops 10cm. First goblet squat attempt.</strong></div></div>
+<div class="phase-row"><div class="phase-lbl">Wks 9–12<br>Strength</div><div class="phase-desc">Shift to 5×5 on main lifts. Introduce barbell back squat to box. <strong>Knee benchmark: squat to parallel with light load. Wall sit 60s+.</strong></div></div>
+<div class="phase-row"><div class="phase-lbl">Wks 13–16<br>Performance</div><div class="phase-desc"><strong>Full squat returning.</strong> Rugby performance measurably better. Stats all trending up. Review, celebrate, set phase 2 goals.</div></div>
+</div>
+</div>
 </div>
 
 <!-- ════════════════════════════════ LOG VIEW ════════════════════════════════ -->
 <div class="view" id="view-log">
-  <div class="log-view">
-    <div class="log-header">
-      <h2>LOG SESSION</h2>
-      <p>Select today's session, fill in your results, hit save.</p>
-    </div>
-
-    <!-- Session Picker -->
-    <div class="session-picker">
-      <div class="session-btn" id="btn-A" onclick="selectSession('A')">
-        <div class="sb-label" style="color:var(--accent-a)">DAY A</div>
-        <div class="sb-sub">Knee & Lower</div>
-        <div class="sb-day">Tuesday</div>
-      </div>
-      <div class="session-btn" id="btn-B" onclick="selectSession('B')">
-        <div class="sb-label" style="color:var(--accent-b)">DAY B</div>
-        <div class="sb-sub">Push & Core</div>
-        <div class="sb-day">Thursday</div>
-      </div>
-      <div class="session-btn" id="btn-C" onclick="selectSession('C')">
-        <div class="sb-label" style="color:var(--accent-c)">DAY C</div>
-        <div class="sb-sub">Pull & Hinge</div>
-        <div class="sb-day">Saturday</div>
-      </div>
-    </div>
-
-    <!-- Date -->
-    <div class="log-date-row">
-      <label>Date</label>
-      <input type="date" id="logDate">
-    </div>
-
-    <!-- Notes -->
-    <div class="log-notes-row">
-      <label>Session Notes (optional)</label>
-      <textarea id="logNotes" placeholder="How did it feel? Any issues? Energy level?"></textarea>
-    </div>
-
-    <!-- Exercise cards injected here -->
-    <div id="exerciseCards"></div>
-
-    <!-- Body stats (always shown) -->
-    <div class="body-stats-card">
-      <h3>📊 Body Stats (log when available)</h3>
-      <div class="body-stats-grid">
-        <div class="bs-field">
-          <div class="bs-label">Bodyweight (kg)</div>
-          <input class="set-input" type="number" step="0.1" placeholder="e.g. 100.0" id="bs-weight">
-        </div>
-        <div class="bs-field">
-          <div class="bs-label">Waist circumference (cm)</div>
-          <input class="set-input" type="number" step="0.5" placeholder="e.g. 95.0" id="bs-waist">
-        </div>
-        <div class="bs-field">
-          <div class="bs-label">Resting heart rate (bpm)</div>
-          <input class="set-input" type="number" step="1" placeholder="e.g. 58" id="bs-rhr">
-        </div>
-        <div class="bs-field">
-          <div class="bs-label">Protein today (g)</div>
-          <input class="set-input" type="number" step="1" placeholder="e.g. 145" id="bs-protein">
-        </div>
-      </div>
-    </div>
-
-    <button class="save-btn" id="saveBtn" onclick="saveSession()" disabled>SELECT A SESSION TO LOG</button>
-  </div>
+<div class="log-view">
+<div class="log-header">
+<h2>LOG SESSION</h2>
+<p>Select today's session, fill in your results, hit save.</p>
+</div>
+<!-- Session Picker -->
+<div class="session-picker">
+<div class="session-btn" id="btn-A" onclick="selectSession('A')">
+<div class="sb-label" style="color:var(--accent-a)">DAY A</div>
+<div class="sb-sub">Knee & Lower</div>
+<div class="sb-day">Tuesday</div>
+</div>
+<div class="session-btn" id="btn-B" onclick="selectSession('B')">
+<div class="sb-label" style="color:var(--accent-b)">DAY B</div>
+<div class="sb-sub">Push & Core</div>
+<div class="sb-day">Thursday</div>
+</div>
+<div class="session-btn" id="btn-C" onclick="selectSession('C')">
+<div class="sb-label" style="color:var(--accent-c)">DAY C</div>
+<div class="sb-sub">Pull & Hinge</div>
+<div class="sb-day">Saturday</div>
+</div>
+</div>
+<!-- Date -->
+<div class="log-date-row">
+<label>Date</label>
+<input type="date" id="logDate">
+</div>
+<!-- Notes -->
+<div class="log-notes-row">
+<label>Session Notes (optional)</label>
+<textarea id="logNotes" placeholder="How did it feel? Any issues? Energy level?"></textarea>
+</div>
+<!-- Exercise cards injected here -->
+<div id="exerciseCards"></div>
+<!-- Body stats (always shown) -->
+<div class="body-stats-card">
+<h3>📊 Body Stats (log when available)</h3>
+<div class="body-stats-grid">
+<div class="bs-field">
+<div class="bs-label">Bodyweight (kg)</div>
+<input class="set-input" type="number" step="0.1" placeholder="e.g. 100.0" id="bs-weight">
+</div>
+<div class="bs-field">
+<div class="bs-label">Waist circumference (cm)</div>
+<input class="set-input" type="number" step="0.5" placeholder="e.g. 95.0" id="bs-waist">
+</div>
+<div class="bs-field">
+<div class="bs-label">Resting heart rate (bpm)</div>
+<input class="set-input" type="number" step="1" placeholder="e.g. 58" id="bs-rhr">
+</div>
+<div class="bs-field">
+<div class="bs-label">Protein today (g)</div>
+<input class="set-input" type="number" step="1" placeholder="e.g. 145" id="bs-protein">
+</div>
+</div>
+</div>
+<button class="save-btn" id="saveBtn" onclick="saveSession()" disabled>SELECT A SESSION TO LOG</button>
+</div>
 </div>
 
 <!-- ════════════════════════════════ PROGRESS VIEW ════════════════════════════════ -->
 <div class="view" id="view-progress">
-  <div class="prog-view">
-    <div class="prog-header">
-      <h2>PROGRESS</h2>
-      <p>Your numbers over time. Every session logged here.</p>
-    </div>
-
-    <!-- Body stats summary -->
-    <div class="body-stats-prog">
-      <div class="p-section-hdr" style="padding:0;margin-bottom:14px"><div class="p-tag">Body</div><div class="p-title">STATS</div></div>
-      <div class="bsp-grid" id="bodyStatsCards">
-        <div class="loading">loading stats…</div>
-      </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="p-section-hdr" style="padding:0;margin-bottom:14px"><div class="p-tag">Benchmarks</div><div class="p-title">KEY METRICS</div></div>
-    <div class="chart-grid" id="chartGrid">
-      <div class="loading">loading charts…</div>
-    </div>
-
-    <!-- History -->
-    <div class="p-section-hdr" style="padding:0;margin-bottom:14px"><div class="p-tag">Log</div><div class="p-title">SESSION HISTORY</div></div>
-    <div class="history-table-wrap">
-      <div id="historyTable"><div class="loading">loading history…</div></div>
-    </div>
-  </div>
+<div class="prog-view">
+<div class="prog-header">
+<h2>PROGRESS</h2>
+<p>Your numbers over time. Every session logged here.</p>
+</div>
+<!-- Body stats summary -->
+<div class="body-stats-prog">
+<div class="p-section-hdr" style="padding:0;margin-bottom:14px"><div class="p-tag">Body</div><div class="p-title">STATS</div></div>
+<div class="bsp-grid" id="bodyStatsCards">
+<div class="loading">loading stats…</div>
+</div>
+</div>
+<!-- Charts -->
+<div class="p-section-hdr" style="padding:0;margin-bottom:14px"><div class="p-tag">Benchmarks</div><div class="p-title">KEY METRICS</div></div>
+<div class="chart-grid" id="chartGrid">
+<div class="loading">loading charts…</div>
+</div>
+<!-- History -->
+<div class="p-section-hdr" style="padding:0;margin-bottom:14px"><div class="p-tag">Log</div><div class="p-title">SESSION HISTORY</div></div>
+<div class="history-table-wrap">
+<div id="historyTable"><div class="loading">loading history…</div></div>
+</div>
+</div>
 </div>
 
 <script>
@@ -599,53 +559,52 @@
 const SUPABASE_URL = 'https://tzqgighznrkqaonkvmow.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_5exN1ZwnFK5zb-ln__XDAw_mGw7yMwj';
 const HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${SUPABASE_KEY}`,
-  'Prefer': 'return=representation'
+'Content-Type': 'application/json',
+'apikey': SUPABASE_KEY,
+'Authorization': `Bearer ${SUPABASE_KEY}`,
+'Prefer': 'return=representation'
 };
 
 // ─── SESSION DEFINITIONS ──────────────────────────────────────────────────────
-// type: 'weight-reps' | 'reps' | 'time' | 'reps-depth' | 'weight-reps-per-side' | 'reps-per-side' | 'weight-carry'
 const SESSIONS = {
-  A: [
-    { id:'wall_sit', name:'Wall Sit Hold', spec:'3 × max hold', type:'time', sets:3, unit:'seconds', note:'Your primary knee benchmark' },
-    { id:'tke', name:'Terminal Knee Extension (TKE)', spec:'3 × 15 each leg', type:'reps', sets:3, unit:'reps' },
-    { id:'box_squat', name:'Box Squat', spec:'3 × 8', type:'reps-depth', sets:3, unit:'reps' },
-    { id:'glute_bridge', name:'Glute Bridge', spec:'3 × 15', type:'weight-reps', sets:3, unit:'reps', optional_weight:true },
-    { id:'reverse_lunge', name:'Reverse Lunge', spec:'3 × 8 each leg', type:'reps', sets:3, unit:'reps' },
-    { id:'calf_raise', name:'Calf Raise (single leg)', spec:'3 × 12 each', type:'reps', sets:3, unit:'reps' },
-    { id:'dead_bug', name:'Dead Bug', spec:'3 × 8 each side', type:'reps', sets:3, unit:'reps' },
-  ],
-  B: [
-    { id:'bench_press', name:'Barbell Bench Press', spec:'4 × 8', type:'weight-reps', sets:4, unit:'kg' },
-    { id:'ohp', name:'Standing OHP', spec:'3 × 8', type:'weight-reps', sets:3, unit:'kg' },
-    { id:'weighted_dips', name:'Weighted Dips', spec:'3 × max', type:'weight-reps', sets:3, unit:'reps', optional_weight:true },
-    { id:'pushup', name:'Push-Up (floor)', spec:'3 × max', type:'reps', sets:3, unit:'reps' },
-    { id:'plank', name:'Plank Hold', spec:'3 × max hold', type:'time', sets:3, unit:'seconds' },
-    { id:'pallof', name:'Pallof Press', spec:'3 × 10 each side', type:'reps', sets:3, unit:'reps' },
-    { id:'hollow_body', name:'Hollow Body Hold', spec:'3 × 20s hold', type:'time', sets:3, unit:'seconds' },
-  ],
-  C: [
-    { id:'rdl', name:'Romanian Deadlift (RDL)', spec:'3 × 8', type:'weight-reps', sets:3, unit:'kg' },
-    { id:'bb_row', name:'Barbell Bent-Over Row', spec:'3 × 10', type:'weight-reps', sets:3, unit:'kg' },
-    { id:'db_row', name:'Single Arm DB Row', spec:'3 × 10 each arm', type:'weight-reps', sets:3, unit:'kg' },
-    { id:'face_pull', name:'Face Pull (band)', spec:'3 × 15', type:'reps', sets:3, unit:'reps' },
-    { id:'inv_row', name:'Inverted Row', spec:'3 × max', type:'reps', sets:3, unit:'reps' },
-    { id:'farmers_carry', name:"Farmer's Carry", spec:'3 × 20m', type:'weight-carry', sets:3, unit:'kg per hand' },
-  ]
+A: [
+{ id:'wall_sit', name:'Wall Sit Hold', spec:'3 × max hold', type:'time', sets:3, unit:'seconds', note:'Your primary knee benchmark' },
+{ id:'tke', name:'Terminal Knee Extension (TKE)', spec:'3 × 15 each leg', type:'reps', sets:3, unit:'reps' },
+{ id:'box_squat', name:'Box Squat', spec:'3 × 8', type:'reps-depth', sets:3, unit:'reps' },
+{ id:'glute_bridge', name:'Glute Bridge', spec:'3 × 15', type:'weight-reps', sets:3, unit:'reps', optional_weight:true },
+{ id:'reverse_lunge', name:'Reverse Lunge', spec:'3 × 8 each leg', type:'reps', sets:3, unit:'reps' },
+{ id:'calf_raise', name:'Calf Raise (single leg)', spec:'3 × 12 each', type:'reps', sets:3, unit:'reps' },
+{ id:'dead_bug', name:'Dead Bug', spec:'3 × 8 each side', type:'reps', sets:3, unit:'reps' },
+],
+B: [
+{ id:'bench_press', name:'Barbell Bench Press', spec:'4 × 8', type:'weight-reps', sets:4, unit:'kg' },
+{ id:'ohp', name:'Standing OHP', spec:'3 × 8', type:'weight-reps', sets:3, unit:'kg' },
+{ id:'weighted_dips', name:'Weighted Dips', spec:'3 × max', type:'weight-reps', sets:3, unit:'reps', optional_weight:true },
+{ id:'pushup', name:'Push-Up (floor)', spec:'3 × max', type:'reps', sets:3, unit:'reps' },
+{ id:'plank', name:'Plank Hold', spec:'3 × max hold', type:'time', sets:3, unit:'seconds' },
+{ id:'pallof', name:'Pallof Press', spec:'3 × 10 each side', type:'reps', sets:3, unit:'reps' },
+{ id:'hollow_body', name:'Hollow Body Hold', spec:'3 × 20s hold', type:'time', sets:3, unit:'seconds' },
+],
+C: [
+{ id:'rdl', name:'Romanian Deadlift (RDL)', spec:'3 × 8', type:'weight-reps', sets:3, unit:'kg' },
+{ id:'bb_row', name:'Barbell Bent-Over Row', spec:'3 × 10', type:'weight-reps', sets:3, unit:'kg' },
+{ id:'db_row', name:'Single Arm DB Row', spec:'3 × 10 each arm', type:'weight-reps', sets:3, unit:'kg' },
+{ id:'face_pull', name:'Face Pull (band)', spec:'3 × 15', type:'reps', sets:3, unit:'reps' },
+{ id:'inv_row', name:'Inverted Row', spec:'3 × max', type:'reps', sets:3, unit:'reps' },
+{ id:'farmers_carry', name:"Farmer's Carry", spec:'3 × 20m', type:'weight-carry', sets:3, unit:'kg per hand' },
+]
 };
 
 // Charts to render
 const CHART_DEFS = [
-  { exercise:'wall_sit', field:'time_seconds', label:'Wall Sit Hold', unit:'sec', color:'#c8f25a', agg:'max' },
-  { exercise:'bench_press', field:'weight_kg', label:'Bench Press', unit:'kg', color:'#5ab4f2', agg:'max' },
-  { exercise:'ohp', field:'weight_kg', label:'Overhead Press', unit:'kg', color:'#5ab4f2', agg:'max' },
-  { exercise:'pushup', field:'reps', label:'Push-Up Reps', unit:'reps', color:'#5ab4f2', agg:'max' },
-  { exercise:'plank', field:'time_seconds', label:'Plank Hold', unit:'sec', color:'#c8f25a', agg:'max' },
-  { exercise:'rdl', field:'weight_kg', label:'RDL Weight', unit:'kg', color:'#f2925a', agg:'max' },
-  { exercise:'bb_row', field:'weight_kg', label:'Bent-Over Row', unit:'kg', color:'#f2925a', agg:'max' },
-  { exercise:'box_squat', field:'depth_score', label:'Box Squat Depth Score', unit:'/10', color:'#c8f25a', agg:'max' },
+{ exercise:'wall_sit', field:'time_seconds', label:'Wall Sit Hold', unit:'sec', color:'#c8f25a', agg:'max' },
+{ exercise:'bench_press', field:'weight_kg', label:'Bench Press', unit:'kg', color:'#5ab4f2', agg:'max' },
+{ exercise:'ohp', field:'weight_kg', label:'Overhead Press', unit:'kg', color:'#5ab4f2', agg:'max' },
+{ exercise:'pushup', field:'reps', label:'Push-Up Reps', unit:'reps', color:'#5ab4f2', agg:'max' },
+{ exercise:'plank', field:'time_seconds', label:'Plank Hold', unit:'sec', color:'#c8f25a', agg:'max' },
+{ exercise:'rdl', field:'weight_kg', label:'RDL Weight', unit:'kg', color:'#f2925a', agg:'max' },
+{ exercise:'bb_row', field:'weight_kg', label:'Bent-Over Row', unit:'kg', color:'#f2925a', agg:'max' },
+{ exercise:'box_squat', field:'depth_score', label:'Box Squat Depth Score', unit:'/10', color:'#c8f25a', agg:'max' },
 ];
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -655,445 +614,438 @@ let charts = {};
 
 // ─── DB SETUP ─────────────────────────────────────────────────────────────────
 async function dbReq(path, method='GET', body=null) {
-  const opts = { method, headers: HEADERS };
-  if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
-  if (!r.ok) {
-    const txt = await r.text();
-    throw new Error(txt);
-  }
-  return r.status === 204 ? null : r.json();
+const opts = { method, headers: HEADERS };
+if (body) opts.body = JSON.stringify(body);
+const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
+if (!r.ok) {
+const txt = await r.text();
+throw new Error(txt);
+}
+return r.status === 204 ? null : r.json();
 }
 
 async function ensureTables() {
-  // We can't create tables via REST — use RPC or just check by querying
-  // Tables must exist. Let's try querying and catch gracefully.
-  try {
-    await dbReq('workout_sessions?limit=1&select=id');
-    setDbStatus(true);
-  } catch(e) {
-    // Tables might not exist — try to create via SQL RPC
-    try {
-      await fetch(SUPABASE_URL + '/rest/v1/rpc/exec_sql', {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify({ sql: `
-          CREATE TABLE IF NOT EXISTS workout_sessions (
-            id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-            session_date date NOT NULL,
-            session_type text NOT NULL,
-            notes text,
-            created_at timestamptz DEFAULT now()
-          );
-          CREATE TABLE IF NOT EXISTS workout_sets (
-            id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-            session_id uuid REFERENCES workout_sessions(id) ON DELETE CASCADE,
-            exercise_id text NOT NULL,
-            set_number int NOT NULL,
-            reps int,
-            weight_kg numeric,
-            time_seconds int,
-            depth_score int,
-            notes text,
-            created_at timestamptz DEFAULT now()
-          );
-          CREATE TABLE IF NOT EXISTS body_stats (
-            id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-            stat_date date NOT NULL,
-            weight_kg numeric,
-            waist_cm numeric,
-            rhr_bpm int,
-            protein_g int,
-            created_at timestamptz DEFAULT now()
-          );
-        `})
-      });
-      setDbStatus(true);
-    } catch(e2) {
-      setDbStatus(false);
-      console.error('DB setup failed:', e2);
-    }
-  }
+try {
+await dbReq('workout_sessions?limit=1&select=id');
+setDbStatus(true);
+} catch(e) {
+try {
+await fetch(SUPABASE_URL + '/rest/v1/rpc/exec_sql', {
+method: 'POST',
+headers: HEADERS,
+body: JSON.stringify({ sql: `
+CREATE TABLE IF NOT EXISTS workout_sessions (
+id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+session_date date NOT NULL,
+session_type text NOT NULL,
+notes text,
+created_at timestamptz DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS workout_sets (
+id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+session_id uuid REFERENCES workout_sessions(id) ON DELETE CASCADE,
+exercise_id text NOT NULL,
+set_number int NOT NULL,
+reps int,
+weight_kg numeric,
+time_seconds int,
+depth_score int,
+notes text,
+created_at timestamptz DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS body_stats (
+id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+stat_date date NOT NULL,
+weight_kg numeric,
+waist_cm numeric,
+rhr_bpm int,
+protein_g int,
+created_at timestamptz DEFAULT now()
+);
+`})
+});
+setDbStatus(true);
+} catch(e2) {
+setDbStatus(false);
+console.error('DB setup failed:', e2);
+}
+}
 }
 
 function setDbStatus(ok) {
-  document.getElementById('dbDot').className = 'status-dot ' + (ok ? 'ok' : 'err');
-  document.getElementById('dbLabel').textContent = ok ? 'connected' : 'offline';
+document.getElementById('dbDot').className = 'status-dot ' + (ok ? 'ok' : 'err');
+document.getElementById('dbLabel').textContent = ok ? 'connected' : 'offline';
 }
 
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'progress') loadProgress();
-  if (name === 'log') loadPrevResults();
+document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+document.getElementById('view-' + name).classList.add('active');
+event.target.classList.add('active');
+if (name === 'progress') loadProgress();
+if (name === 'log') loadPrevResults();
 }
 
 // ─── SESSION SELECTION ────────────────────────────────────────────────────────
 function selectSession(s) {
-  currentSession = s;
-  ['A','B','C'].forEach(x => {
-    const btn = document.getElementById('btn-'+x);
-    btn.className = 'session-btn' + (x===s ? ' selected-'+x.toLowerCase() : '');
-  });
-  renderExerciseCards();
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = false;
-  btn.textContent = 'SAVE SESSION ' + s;
+currentSession = s;
+['A','B','C'].forEach(x => {
+const btn = document.getElementById('btn-'+x);
+btn.className = 'session-btn' + (x===s ? ' selected-'+x.toLowerCase() : '');
+});
+renderExerciseCards();
+const btn = document.getElementById('saveBtn');
+btn.disabled = false;
+btn.textContent = 'SAVE SESSION ' + s;
 }
 
 function autoSelectSession() {
-  const day = new Date().getDay(); // 0=Sun,1=Mon,...6=Sat
-  if (day === 2) selectSession('A');       // Tuesday
-  else if (day === 4) selectSession('B');  // Thursday
-  else if (day === 6) selectSession('C');  // Saturday
+const day = new Date().getDay();
+if (day === 2) selectSession('A');
+else if (day === 4) selectSession('B');
+else if (day === 6) selectSession('C');
 }
 
 function setDefaultDate() {
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('logDate').value = today;
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('logDate').value = today;
 }
 
 // ─── EXERCISE CARDS ───────────────────────────────────────────────────────────
 function renderExerciseCards() {
-  const container = document.getElementById('exerciseCards');
-  const exercises = SESSIONS[currentSession];
-  container.innerHTML = exercises.map(ex => renderCard(ex)).join('');
+const container = document.getElementById('exerciseCards');
+const exercises = SESSIONS[currentSession];
+container.innerHTML = exercises.map(ex => renderCard(ex)).join('');
 }
 
 function renderCard(ex) {
-  const prev = prevResults[ex.id];
-  const prevHtml = prev ? `<div class="prev-val">Last session: ${formatPrev(prev, ex)}</div>` : '';
-  const setsHtml = Array.from({length: ex.sets}, (_,i) => renderSetRow(ex, i+1)).join('');
-  return `
-    <div class="ex-log-card" id="card-${ex.id}">
-      <div class="ex-log-hdr">
-        <div>
-          <div class="ex-log-name">${ex.name}</div>
-          <div class="ex-log-spec">${ex.spec}</div>
-        </div>
-        <button class="ex-skip" onclick="toggleSkip('${ex.id}')">Skip</button>
-      </div>
-      <div class="ex-log-body" id="body-${ex.id}">
-        <div class="sets-grid">${setsHtml}</div>
-        ${prevHtml}
-      </div>
-    </div>`;
+const prev = prevResults[ex.id];
+const prevHtml = prev ? `<div class="prev-val">Last session: ${formatPrev(prev, ex)}</div>` : '';
+const setsHtml = Array.from({length: ex.sets}, (_,i) => renderSetRow(ex, i+1)).join('');
+return `
+<div class="ex-log-card" id="card-${ex.id}">
+<div class="ex-log-hdr">
+<div>
+<div class="ex-log-name">${ex.name}</div>
+<div class="ex-log-spec">${ex.spec}</div>
+</div>
+<button class="ex-skip" onclick="toggleSkip('${ex.id}')">Skip</button>
+</div>
+<div class="ex-log-body" id="body-${ex.id}">
+<div class="sets-grid">${setsHtml}</div>
+${prevHtml}
+</div>
+</div>`;
 }
 
 function renderSetRow(ex, setNum) {
-  const base = `ex-${ex.id}-s${setNum}`;
-  if (ex.type === 'weight-reps') {
-    return `<div class="set-row type-weight-reps">
-      <div class="set-lbl">Set ${setNum}</div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Weight (kg)</div><input class="set-input" type="number" step="0.5" placeholder="kg" id="${base}-w"></div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Reps</div><input class="set-input" type="number" step="1" placeholder="reps" id="${base}-r"></div>
-    </div>`;
-  } else if (ex.type === 'reps') {
-    return `<div class="set-row type-reps">
-      <div class="set-lbl">Set ${setNum}</div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Reps</div><input class="set-input" type="number" step="1" placeholder="reps" id="${base}-r"></div>
-    </div>`;
-  } else if (ex.type === 'time') {
-    return `<div class="set-row type-time">
-      <div class="set-lbl">Set ${setNum}</div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Time (seconds)</div><input class="set-input" type="number" step="1" placeholder="secs" id="${base}-t"></div>
-    </div>`;
-  } else if (ex.type === 'reps-depth') {
-    return `<div class="set-row type-reps-depth">
-      <div class="set-lbl">Set ${setNum}</div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Reps</div><input class="set-input" type="number" step="1" placeholder="reps" id="${base}-r"></div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Depth comfort (1–10)</div><input class="set-input" type="number" step="1" min="1" max="10" placeholder="1–10" id="${base}-d"></div>
-    </div>`;
-  } else if (ex.type === 'weight-carry') {
-    return `<div class="set-row type-weight-reps">
-      <div class="set-lbl">Set ${setNum}</div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Weight per hand (kg)</div><input class="set-input" type="number" step="0.5" placeholder="kg" id="${base}-w"></div>
-      <div class="set-input-wrap"><div class="set-input-lbl">Distance (m)</div><input class="set-input" type="number" step="1" placeholder="20m" value="20" id="${base}-r"></div>
-    </div>`;
-  }
-  return '';
+const base = `ex-${ex.id}-s${setNum}`;
+if (ex.type === 'weight-reps') {
+return `<div class="set-row type-weight-reps">
+<div class="set-lbl">Set ${setNum}</div>
+<div class="set-input-wrap"><div class="set-input-lbl">Weight (kg)</div><input class="set-input" type="number" step="0.5" placeholder="kg" id="${base}-w"></div>
+<div class="set-input-wrap"><div class="set-input-lbl">Reps</div><input class="set-input" type="number" step="1" placeholder="reps" id="${base}-r"></div>
+</div>`;
+} else if (ex.type === 'reps') {
+return `<div class="set-row type-reps">
+<div class="set-lbl">Set ${setNum}</div>
+<div class="set-input-wrap"><div class="set-input-lbl">Reps</div><input class="set-input" type="number" step="1" placeholder="reps" id="${base}-r"></div>
+</div>`;
+} else if (ex.type === 'time') {
+return `<div class="set-row type-time">
+<div class="set-lbl">Set ${setNum}</div>
+<div class="set-input-wrap"><div class="set-input-lbl">Time (seconds)</div><input class="set-input" type="number" step="1" placeholder="secs" id="${base}-t"></div>
+</div>`;
+} else if (ex.type === 'reps-depth') {
+return `<div class="set-row type-reps-depth">
+<div class="set-lbl">Set ${setNum}</div>
+<div class="set-input-wrap"><div class="set-input-lbl">Reps</div><input class="set-input" type="number" step="1" placeholder="reps" id="${base}-r"></div>
+<div class="set-input-wrap"><div class="set-input-lbl">Depth comfort (1–10)</div><input class="set-input" type="number" step="1" min="1" max="10" placeholder="1–10" id="${base}-d"></div>
+</div>`;
+} else if (ex.type === 'weight-carry') {
+return `<div class="set-row type-weight-reps">
+<div class="set-lbl">Set ${setNum}</div>
+<div class="set-input-wrap"><div class="set-input-lbl">Weight per hand (kg)</div><input class="set-input" type="number" step="0.5" placeholder="kg" id="${base}-w"></div>
+<div class="set-input-wrap"><div class="set-input-lbl">Distance (m)</div><input class="set-input" type="number" step="1" placeholder="20m" value="20" id="${base}-r"></div>
+</div>`;
+}
+return '';
 }
 
 function toggleSkip(exId) {
-  const btn = document.querySelector(`#card-${exId} .ex-skip`);
-  const body = document.getElementById(`body-${exId}`);
-  const inputs = body.querySelectorAll('.set-input');
-  const isSkipped = btn.classList.contains('skipped');
-  btn.classList.toggle('skipped', !isSkipped);
-  btn.textContent = isSkipped ? 'Skip' : 'Skipped';
-  inputs.forEach(i => i.classList.toggle('skipped-input', !isSkipped));
+const btn = document.querySelector(`#card-${exId} .ex-skip`);
+const body = document.getElementById(`body-${exId}`);
+const inputs = body.querySelectorAll('.set-input');
+const isSkipped = btn.classList.contains('skipped');
+btn.classList.toggle('skipped', !isSkipped);
+btn.textContent = isSkipped ? 'Skip' : 'Skipped';
+inputs.forEach(i => i.classList.toggle('skipped-input', !isSkipped));
 }
 
 function formatPrev(prev, ex) {
-  if (ex.type === 'time') return prev.map(s => s.time_seconds + 's').join(' / ');
-  if (ex.type === 'weight-reps') return prev.map(s => (s.weight_kg||'BW') + 'kg × ' + s.reps).join(' / ');
-  if (ex.type === 'reps') return prev.map(s => s.reps + ' reps').join(' / ');
-  if (ex.type === 'reps-depth') return prev.map(s => s.reps + ' reps, depth ' + s.depth_score + '/10').join(' / ');
-  if (ex.type === 'weight-carry') return prev.map(s => (s.weight_kg||'?') + 'kg/hand').join(' / ');
-  return '';
+if (ex.type === 'time') return prev.map(s => s.time_seconds + 's').join(' / ');
+if (ex.type === 'weight-reps') return prev.map(s => (s.weight_kg||'BW') + 'kg × ' + s.reps).join(' / ');
+if (ex.type === 'reps') return prev.map(s => s.reps + ' reps').join(' / ');
+if (ex.type === 'reps-depth') return prev.map(s => s.reps + ' reps, depth ' + s.depth_score + '/10').join(' / ');
+if (ex.type === 'weight-carry') return prev.map(s => (s.weight_kg||'?') + 'kg/hand').join(' / ');
+return '';
 }
 
 // ─── LOAD PREVIOUS RESULTS ───────────────────────────────────────────────────
 async function loadPrevResults() {
-  if (!currentSession) return;
-  try {
-    // Get all sets for this exercise in the last session of this type
-    const sessions = await dbReq(`workout_sessions?session_type=eq.${currentSession}&order=session_date.desc&limit=1&select=id`);
-    if (!sessions || sessions.length === 0) return;
-    const lastId = sessions[0].id;
-    const sets = await dbReq(`workout_sets?session_id=eq.${lastId}&order=set_number.asc`);
-    prevResults = {};
-    sets.forEach(s => {
-      if (!prevResults[s.exercise_id]) prevResults[s.exercise_id] = [];
-      prevResults[s.exercise_id].push(s);
-    });
-    renderExerciseCards(); // re-render with prev data
-  } catch(e) {
-    console.error('Could not load prev results:', e);
-  }
+if (!currentSession) return;
+try {
+const sessions = await dbReq(`workout_sessions?session_type=eq.${currentSession}&order=session_date.desc&limit=1&select=id`);
+if (!sessions || sessions.length === 0) return;
+const lastId = sessions[0].id;
+const sets = await dbReq(`workout_sets?session_id=eq.${lastId}&order=set_number.asc`);
+prevResults = {};
+sets.forEach(s => {
+if (!prevResults[s.exercise_id]) prevResults[s.exercise_id] = [];
+prevResults[s.exercise_id].push(s);
+});
+renderExerciseCards();
+} catch(e) {
+console.error('Could not load prev results:', e);
+}
 }
 
-// ─── SAVE SESSION ─────────────────────────────────────────────────────────────
+// ─── SAVE SESSION (FIXED: all rows now have uniform keys for PostgREST) ──────
 async function saveSession() {
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  btn.textContent = 'SAVING…';
+const btn = document.getElementById('saveBtn');
+btn.disabled = true;
+btn.textContent = 'SAVING…';
+try {
+const date = document.getElementById('logDate').value;
+const notes = document.getElementById('logNotes').value;
+if (!date) { showToast('Please set a date', true); btn.disabled=false; btn.textContent='SAVE SESSION '+currentSession; return; }
 
-  try {
-    const date = document.getElementById('logDate').value;
-    const notes = document.getElementById('logNotes').value;
-    if (!date) { showToast('Please set a date', true); btn.disabled=false; btn.textContent='SAVE SESSION '+currentSession; return; }
+// Create session
+const [session] = await dbReq('workout_sessions', 'POST', {
+session_date: date,
+session_type: currentSession,
+notes: notes || null
+});
 
-    // Create session
-    const [session] = await dbReq('workout_sessions', 'POST', {
-      session_date: date,
-      session_type: currentSession,
-      notes: notes || null
-    });
+// Collect sets — FIX: every row includes ALL columns with null defaults
+// so PostgREST doesn't reject the batch (PGRST102)
+const exercises = SESSIONS[currentSession];
+const setsToInsert = [];
+exercises.forEach(ex => {
+const skipped = document.querySelector(`#card-${ex.id} .ex-skip`)?.classList.contains('skipped');
+if (skipped) return;
 
-    // Collect sets
-    const exercises = SESSIONS[currentSession];
-    const setsToInsert = [];
+for (let i = 1; i <= ex.sets; i++) {
+const base = `ex-${ex.id}-s${i}`;
+const w = document.getElementById(`${base}-w`);
+const r = document.getElementById(`${base}-r`);
+const t = document.getElementById(`${base}-t`);
+const d = document.getElementById(`${base}-d`);
 
-    exercises.forEach(ex => {
-      const skipped = document.querySelector(`#card-${ex.id} .ex-skip`)?.classList.contains('skipped');
-      if (skipped) return;
-      for (let i = 1; i <= ex.sets; i++) {
-        const base = `ex-${ex.id}-s${i}`;
-        const row = { session_id: session.id, exercise_id: ex.id, set_number: i };
-        const w = document.getElementById(`${base}-w`);
-        const r = document.getElementById(`${base}-r`);
-        const t = document.getElementById(`${base}-t`);
-        const d = document.getElementById(`${base}-d`);
-        if (w && w.value) row.weight_kg = parseFloat(w.value);
-        if (r && r.value) row.reps = parseInt(r.value);
-        if (t && t.value) row.time_seconds = parseInt(t.value);
-        if (d && d.value) row.depth_score = parseInt(d.value);
-        // Only insert if at least one value was entered
-        if (row.reps || row.weight_kg || row.time_seconds || row.depth_score) {
-          setsToInsert.push(row);
-        }
-      }
-    });
+const row = {
+session_id: session.id,
+exercise_id: ex.id,
+set_number: i,
+weight_kg: (w && w.value) ? parseFloat(w.value) : null,
+reps: (r && r.value) ? parseInt(r.value) : null,
+time_seconds: (t && t.value) ? parseInt(t.value) : null,
+depth_score: (d && d.value) ? parseInt(d.value) : null
+};
 
-    if (setsToInsert.length > 0) {
-      await dbReq('workout_sets', 'POST', setsToInsert);
-    }
+// Only insert if at least one value was entered
+if (row.reps || row.weight_kg || row.time_seconds || row.depth_score) {
+setsToInsert.push(row);
+}
+}
+});
 
-    // Body stats
-    const bw = document.getElementById('bs-weight').value;
-    const wc = document.getElementById('bs-waist').value;
-    const rhr = document.getElementById('bs-rhr').value;
-    const prot = document.getElementById('bs-protein').value;
-    if (bw || wc || rhr || prot) {
-      await dbReq('body_stats', 'POST', {
-        stat_date: date,
-        weight_kg: bw ? parseFloat(bw) : null,
-        waist_cm: wc ? parseFloat(wc) : null,
-        rhr_bpm: rhr ? parseInt(rhr) : null,
-        protein_g: prot ? parseInt(prot) : null
-      });
-    }
+if (setsToInsert.length > 0) {
+await dbReq('workout_sets', 'POST', setsToInsert);
+}
 
-    showToast('Session saved! 💪');
-    // Reset form
-    document.getElementById('logNotes').value = '';
-    document.getElementById('bs-weight').value = '';
-    document.getElementById('bs-waist').value = '';
-    document.getElementById('bs-rhr').value = '';
-    document.getElementById('bs-protein').value = '';
-    renderExerciseCards();
-    await loadPrevResults();
+// Body stats
+const bw = document.getElementById('bs-weight').value;
+const wc = document.getElementById('bs-waist').value;
+const rhr = document.getElementById('bs-rhr').value;
+const prot = document.getElementById('bs-protein').value;
+if (bw || wc || rhr || prot) {
+await dbReq('body_stats', 'POST', {
+stat_date: date,
+weight_kg: bw ? parseFloat(bw) : null,
+waist_cm: wc ? parseFloat(wc) : null,
+rhr_bpm: rhr ? parseInt(rhr) : null,
+protein_g: prot ? parseInt(prot) : null
+});
+}
 
-  } catch(e) {
-    showToast('Save failed: ' + e.message, true);
-    console.error(e);
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'SAVE SESSION ' + currentSession;
+showToast('Session saved! 💪');
+// Reset form
+document.getElementById('logNotes').value = '';
+document.getElementById('bs-weight').value = '';
+document.getElementById('bs-waist').value = '';
+document.getElementById('bs-rhr').value = '';
+document.getElementById('bs-protein').value = '';
+renderExerciseCards();
+await loadPrevResults();
+} catch(e) {
+showToast('Save failed: ' + e.message, true);
+console.error(e);
+}
+btn.disabled = false;
+btn.textContent = 'SAVE SESSION ' + currentSession;
 }
 
 // ─── PROGRESS VIEW ────────────────────────────────────────────────────────────
 async function loadProgress() {
-  await Promise.all([loadBodyStats(), loadCharts(), loadHistory()]);
+await Promise.all([loadBodyStats(), loadCharts(), loadHistory()]);
 }
 
 async function loadBodyStats() {
-  const container = document.getElementById('bodyStatsCards');
-  try {
-    const rows = await dbReq('body_stats?order=stat_date.desc&limit=50');
-    const latest = rows[0] || {};
-    const prev = rows.find((r,i) => i > 0 && r.weight_kg) || {};
-
-    const fields = [
-      { key:'weight_kg', label:'Bodyweight', unit:'kg', icon:'⚖️', good:'down' },
-      { key:'waist_cm', label:'Waist', unit:'cm', icon:'📏', good:'down' },
-      { key:'rhr_bpm', label:'Resting HR', unit:'bpm', icon:'❤️', good:'down' },
-      { key:'protein_g', label:'Protein', unit:'g', icon:'🥩', good:'up' },
-    ];
-
-    container.innerHTML = fields.map(f => {
-      const val = latest[f.key];
-      const pval = prev[f.key];
-      let changeHtml = '<div class="bsp-change neutral">no data yet</div>';
-      if (val != null && pval != null) {
-        const diff = (val - pval).toFixed(1);
-        const isGood = f.good === 'down' ? diff < 0 : diff > 0;
-        const cls = diff == 0 ? 'neutral' : isGood ? 'up' : 'down';
-        changeHtml = `<div class="bsp-change ${cls}">${diff > 0 ? '+' : ''}${diff} ${f.unit}</div>`;
-      }
-      return `<div class="bsp-card">
-        <div class="bsp-label">${f.icon} ${f.label}</div>
-        <div class="bsp-val">${val != null ? val : '—'}<span class="bsp-unit">${val != null ? f.unit : ''}</span></div>
-        ${changeHtml}
-      </div>`;
-    }).join('');
-  } catch(e) {
-    container.innerHTML = '<div class="empty-state"><p>No body stats yet</p></div>';
-  }
+const container = document.getElementById('bodyStatsCards');
+try {
+const rows = await dbReq('body_stats?order=stat_date.desc&limit=50');
+const latest = rows[0] || {};
+const prev = rows.find((r,i) => i > 0 && r.weight_kg) || {};
+const fields = [
+{ key:'weight_kg', label:'Bodyweight', unit:'kg', icon:'⚖️', good:'down' },
+{ key:'waist_cm', label:'Waist', unit:'cm', icon:'📏', good:'down' },
+{ key:'rhr_bpm', label:'Resting HR', unit:'bpm', icon:'❤️', good:'down' },
+{ key:'protein_g', label:'Protein', unit:'g', icon:'🥩', good:'up' },
+];
+container.innerHTML = fields.map(f => {
+const val = latest[f.key];
+const pval = prev[f.key];
+let changeHtml = '<div class="bsp-change neutral">no data yet</div>';
+if (val != null && pval != null) {
+const diff = (val - pval).toFixed(1);
+const isGood = f.good === 'down' ? diff < 0 : diff > 0;
+const cls = diff == 0 ? 'neutral' : isGood ? 'up' : 'down';
+changeHtml = `<div class="bsp-change ${cls}">${diff > 0 ? '+' : ''}${diff} ${f.unit}</div>`;
+}
+return `<div class="bsp-card">
+<div class="bsp-label">${f.icon} ${f.label}</div>
+<div class="bsp-val">${val != null ? val : '—'}<span class="bsp-unit">${val != null ? f.unit : ''}</span></div>
+${changeHtml}
+</div>`;
+}).join('');
+} catch(e) {
+container.innerHTML = '<div class="empty-state"><p>No body stats yet</p></div>';
+}
 }
 
 async function loadCharts() {
-  const grid = document.getElementById('chartGrid');
-  grid.innerHTML = '';
+const grid = document.getElementById('chartGrid');
+grid.innerHTML = '';
+// Destroy old charts
+Object.values(charts).forEach(c => c.destroy());
+charts = {};
 
-  // Destroy old charts
-  Object.values(charts).forEach(c => c.destroy());
-  charts = {};
+for (const def of CHART_DEFS) {
+try {
+const sets = await dbReq(`workout_sets?exercise_id=eq.${def.exercise}&select=*,workout_sessions(session_date)&order=created_at.asc`);
+// Group by date, take max per day
+const byDate = {};
+sets.forEach(s => {
+const date = s.workout_sessions?.session_date;
+if (!date) return;
+const val = s[def.field];
+if (val == null) return;
+if (!byDate[date] || val > byDate[date]) byDate[date] = val;
+});
 
-  for (const def of CHART_DEFS) {
-    try {
-      // Get sets for this exercise, joined with session date
-      const sets = await dbReq(`workout_sets?exercise_id=eq.${def.exercise}&select=*,workout_sessions(session_date)&order=created_at.asc`);
-      
-      // Group by date, take max per day
-      const byDate = {};
-      sets.forEach(s => {
-        const date = s.workout_sessions?.session_date;
-        if (!date) return;
-        const val = s[def.field];
-        if (val == null) return;
-        if (!byDate[date] || val > byDate[date]) byDate[date] = val;
-      });
+const dates = Object.keys(byDate).sort();
+if (dates.length === 0) continue;
+const values = dates.map(d => byDate[d]);
+const best = Math.max(...values);
 
-      const dates = Object.keys(byDate).sort();
-      const values = dates.map(d => byDate[d]);
-      const best = values.length ? Math.max(...values) : null;
+const cardId = `chart-${def.exercise}`;
+const card = document.createElement('div');
+card.className = 'chart-card';
+card.innerHTML = `
+<div class="chart-title">${def.label}</div>
+<div class="chart-sub">Best: ${best}${def.unit}</div>
+<div class="chart-canvas-wrap"><canvas id="${cardId}"></canvas></div>
+<div class="chart-best">Best: <span>${best}${def.unit}</span></div>`;
+grid.appendChild(card);
 
-      const cardId = `chart-${def.exercise}`;
-      const card = document.createElement('div');
-      card.className = 'chart-card';
-      card.innerHTML = `
-        <div class="chart-title">${def.label}</div>
-        <div class="chart-sub">${def.unit} · best: <span style="color:${def.color}">${best != null ? best + ' ' + def.unit : '—'}</span></div>
-        <div class="chart-canvas-wrap"><canvas id="${cardId}"></canvas></div>
-      `;
-      grid.appendChild(card);
+const ctx = document.getElementById(cardId).getContext('2d');
+charts[def.exercise] = new Chart(ctx, {
+type: 'line',
+data: {
+labels: dates.map(d => { const p = d.split('-'); return p[2]+'/'+p[1]; }),
+datasets: [{
+data: values,
+borderColor: def.color,
+backgroundColor: def.color + '18',
+fill: true,
+tension: 0.3,
+pointRadius: 4,
+pointBackgroundColor: def.color,
+borderWidth: 2,
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: { legend: { display: false } },
+scales: {
+x: { ticks: { color: '#666', font: { family: 'DM Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+y: { ticks: { color: '#666', font: { family: 'DM Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.06)' } }
+}
+}
+});
+} catch(e) {
+console.error('Chart error for', def.exercise, e);
+}
+}
 
-      if (dates.length > 0) {
-        const ctx = document.getElementById(cardId).getContext('2d');
-        charts[def.exercise] = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: dates.map(d => d.slice(5)), // MM-DD
-            datasets: [{
-              data: values,
-              borderColor: def.color,
-              backgroundColor: def.color + '18',
-              borderWidth: 2,
-              pointBackgroundColor: def.color,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              tension: 0.3,
-              fill: true,
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { color: '#2a2a2a' }, ticks: { color: '#666', font: { family: 'DM Mono', size: 10 } } },
-              y: { grid: { color: '#2a2a2a' }, ticks: { color: '#666', font: { family: 'DM Mono', size: 10 } }, beginAtZero: false }
-            }
-          }
-        });
-      } else {
-        const canvasWrap = card.querySelector('.chart-canvas-wrap');
-        canvasWrap.innerHTML = '<div class="empty-state" style="padding:24px"><div class="emoji">📊</div><p>Log a session to see this chart</p></div>';
-      }
-    } catch(e) {
-      console.error(`Chart ${def.exercise} failed:`, e);
-    }
-  }
+if (grid.children.length === 0) {
+grid.innerHTML = '<div class="empty-state"><div class="emoji">📊</div><p>No benchmark data yet.<br>Log your first session to see charts here.</p></div>';
+}
 }
 
 async function loadHistory() {
-  const container = document.getElementById('historyTable');
-  try {
-    const sessions = await dbReq('workout_sessions?order=session_date.desc&limit=30&select=*');
-    if (!sessions || sessions.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="emoji">🏋️</div><p>No sessions logged yet.<br>Head to the Log tab to record your first session.</p></div>';
-      return;
-    }
-
-    const rows = sessions.map(s => `
-      <tr>
-        <td><span class="sess-badge ${s.session_type}">${s.session_type}</span></td>
-        <td>${s.session_date}</td>
-        <td style="color:var(--muted2);font-size:12px">${s.notes || '—'}</td>
-      </tr>
-    `).join('');
-
-    container.innerHTML = `<table class="htable">
-      <thead><tr><th>Session</th><th>Date</th><th>Notes</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  } catch(e) {
-    container.innerHTML = '<div class="empty-state"><p>Could not load history</p></div>';
-  }
+const container = document.getElementById('historyTable');
+try {
+const sessions = await dbReq('workout_sessions?order=session_date.desc&limit=30&select=*');
+if (!sessions || sessions.length === 0) {
+container.innerHTML = '<div class="empty-state"><div class="emoji">📝</div><p>No sessions logged yet.<br>Hit the Log tab to record your first workout.</p></div>';
+return;
+}
+let html = `<table class="htable">
+<thead><tr><th>Date</th><th>Session</th><th>Notes</th></tr></thead><tbody>`;
+sessions.forEach(s => {
+const d = s.session_date;
+const parts = d.split('-');
+const dateStr = parts[2] + '/' + parts[1] + '/' + parts[0];
+html += `<tr>
+<td style="font-family:'DM Mono',monospace;font-size:12px">${dateStr}</td>
+<td><span class="sess-badge ${s.session_type}">DAY ${s.session_type}</span></td>
+<td style="color:var(--muted);font-size:12px">${s.notes || '—'}</td>
+</tr>`;
+});
+html += '</tbody></table>';
+container.innerHTML = html;
+} catch(e) {
+container.innerHTML = '<div class="empty-state"><p>Could not load history</p></div>';
+console.error(e);
+}
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
 function showToast(msg, isError=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+const t = document.getElementById('toast');
+t.textContent = msg;
+t.className = 'toast' + (isError ? ' error' : '');
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-(async function init() {
-  setDefaultDate();
-  await ensureTables();
-  autoSelectSession();
-  if (currentSession) await loadPrevResults();
-})();
+ensureTables();
+setDefaultDate();
+autoSelectSession();
 </script>
 </body>
 </html>
